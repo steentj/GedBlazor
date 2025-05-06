@@ -1,0 +1,81 @@
+@using Microsoft.AspNetCore.Components.Forms
+@using GedBlazor.Models
+@using GedBlazor.Parsers
+@inject IGedcomParser Parser
+
+<div class="gedcom-uploader">
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            @errorMessage
+        </div>
+    }
+
+    <InputFile OnChange="@HandleFileSelected" class="form-control" accept=".ged" />
+    <p class="mt-2">Drop GEDCOM file here or click to select (.ged files only)</p>
+
+    @if (individuals?.Count > 0)
+    {
+        <div class="table-responsive">
+            <table class="table mt-4">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Birth</th>
+                        <th>Death</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var individual in individuals.Values.OrderBy(i => i.FullName))
+                    {
+                        <tr>
+                            <td>@individual.FullName</td>
+                            <td>@individual.BirthDate</td>
+                            <td>@individual.DeathDate</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@code {
+    private Dictionary<string, Individual>? individuals;
+    private string? errorMessage;
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        try
+        {
+            errorMessage = null;
+            var file = e.File;
+
+            if (!file.Name.EndsWith(".ged", StringComparison.OrdinalIgnoreCase))
+            {
+                errorMessage = "Please select a valid GEDCOM file (.ged)";
+                return;
+            }
+
+            using var reader = new StreamReader(file.OpenReadStream());
+            var content = await reader.ReadToEndAsync();
+            
+            (individuals, _) = Parser.Parse(content);
+
+            if (individuals.Count == 0)
+            {
+                errorMessage = "No individuals found in the GEDCOM file";
+            }
+        }
+        catch (FormatException)
+        {
+            errorMessage = "Invalid GEDCOM file format";
+            individuals = null;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error processing file: {ex.Message}";
+            individuals = null;
+        }
+    }
+}
