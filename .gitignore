@@ -404,4 +404,7 @@ FodyWeavers.xsd
 testinput/
 testoutput/
 
+# macOS
+.DS_Store
+
 

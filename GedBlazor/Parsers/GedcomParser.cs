@@ -1,4 +1,5 @@
 using GedBlazor.Models;
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 
 namespace GedBlazor.Parsers;
@@ -16,13 +17,15 @@ public partial class GedcomParser : IGedcomParser
         _individuals.Clear();
         _families.Clear();
 
-        var lines = content.Split('\n', StringSplitOptions.RemoveEmptyEntries)
+        // Split on any type of line ending
+        var lines = content.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None)
                           .Select(l => l.Trim())
                           .Where(l => !string.IsNullOrWhiteSpace(l))
                           .ToArray();
                           
-        if (!IsValidGedcom(lines))
-            throw new FormatException("Invalid GEDCOM format: Missing header or trailer");
+        var (isValid, reason) = IsValidGedcom(lines);
+        if (!isValid)
+            throw new FormatException($"Invalid GEDCOM format: {reason}");
 
         ParseRecords(lines);
         LinkFamilies();
@@ -30,11 +33,26 @@ public partial class GedcomParser : IGedcomParser
         return (_individuals, _families);
     }
 
-    private bool IsValidGedcom(string[] lines)
+    private (bool isValid, string reason) IsValidGedcom(string[] lines)
     {
-        return lines.Length >= 2 && 
-               lines[0].Equals("0 HEAD", StringComparison.OrdinalIgnoreCase) && 
-               lines[^1].Equals("0 TRLR", StringComparison.OrdinalIgnoreCase);
+        // Clean and normalize lines to handle different line endings
+        var normalizedLines = lines.Select(l => l.TrimEnd('\r', '\n', ' ', '\t')).ToList();
+        
+        if (!normalizedLines.Any())
+            return (false, "GEDCOM file must contain at least a header and trailer");
+            
+        if (!normalizedLines[0].Equals("0 HEAD", StringComparison.OrdinalIgnoreCase))
+            return (false, "GEDCOM file must start with '0 HEAD'");
+            
+        if (normalizedLines.Count < 2)
+            return (false, "GEDCOM file must contain at least a header and trailer");
+            
+        // Look for TRLR record near the end - allow for some trailing whitespace/empty lines
+        var lastNonEmptyLine = normalizedLines.FindLast(l => !string.IsNullOrWhiteSpace(l));
+        if (lastNonEmptyLine == null || !lastNonEmptyLine.StartsWith("0 TRLR", StringComparison.OrdinalIgnoreCase))
+            return (false, "GEDCOM file must end with '0 TRLR'");
+        
+        return (true, string.Empty);
     }
 
     private void ParseRecords(string[] lines)
