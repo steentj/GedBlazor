@@ -100,13 +100,13 @@ public partial class GedcomParser : IGedcomParser
         var id = parts[1];
         var tag = parts[2];
 
-        if (id.StartsWith("@I") && tag == "INDI")
+        if (tag == "INDI")
         {
             var individual = new Individual(id);
             _individuals[id] = individual;
             return (individual, null);
         }
-        else if (id.StartsWith("@F") && tag == "FAM")
+        else if (tag == "FAM")
         {
             var family = new Family(id);
             _families[id] = family;

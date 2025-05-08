@@ -159,4 +159,26 @@ public class GedcomParserTests
         // Assert
         Assert.That(individuals["@I1@"].BirthDate, Is.Null);
     }
+
+    [Test]
+    public void ParseLevelZeroRecord_ShouldParseIndividualsWithNonStandardIds()
+    {
+        // Arrange
+        string gedcomContent = @"
+0 HEAD
+1 GEDC
+2 VERS 5.5.1
+0 @ABCD@ INDI
+1 NAME John /Doe/
+0 TRLR
+";
+
+        // Act
+        var (individuals, _) = parser.Parse(gedcomContent);
+
+        // Assert
+        Assert.That(individuals.ContainsKey("@ABCD@"), Is.True);
+        Assert.That(individuals["@ABCD@"].GivenName, Is.EqualTo("John"));
+        Assert.That(individuals["@ABCD@"].Surname, Is.EqualTo("Doe"));
+    }
 }
