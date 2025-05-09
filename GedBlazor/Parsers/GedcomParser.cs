@@ -167,50 +167,42 @@ public partial class GedcomParser : IGedcomParser
         if (parts.Length < 3 || currentIndividual == null || currentTag == null)
             return;
 
-        var tag = parts[1];
-        if (currentTag == "BIRT")
+        if (currentTag == "BIRT" || currentTag == "DEAT")
         {
-            if (tag == "DATE")
+            SetEventData(currentIndividual, currentTag, parts[1], parts[2]);
+        }
+    }
+
+    private void SetEventData(Individual individual, string eventType, string tag, string value)
+    {
+        // eventType: "BIRT" or "DEAT"
+        if (tag == "DATE")
+        {
+            try
             {
-                try
-                {
-                    currentIndividual.SetBirth(GedcomDate.Parse(parts[2]));
-                }
-                catch (Exception)
-                {
-                    // Skip invalid date formats
-                }
+                if (eventType == "BIRT")
+                    individual.SetBirth(GedcomDate.Parse(value));
+                else if (eventType == "DEAT")
+                    individual.SetDeath(GedcomDate.Parse(value));
             }
-            else if (tag == "PLAC")
+            catch (Exception)
             {
-                currentIndividual.BirthPlace = parts[2];
-            }
-            else if (tag == "AGNC" && string.IsNullOrEmpty(currentIndividual.BirthPlace))
-            {
-                currentIndividual.BirthPlace = parts[2];
+                // Skip invalid date formats
             }
         }
-        else if (currentTag == "DEAT")
+        else if (tag == "PLAC")
         {
-            if (tag == "DATE")
-            {
-                try
-                {
-                    currentIndividual.SetDeath(GedcomDate.Parse(parts[2]));
-                }
-                catch (Exception)
-                {
-                    // Skip invalid date formats
-                }
-            }
-            else if (tag == "PLAC")
-            {
-                currentIndividual.DeathPlace = parts[2];
-            }
-            else if (tag == "AGNC" && string.IsNullOrEmpty(currentIndividual.DeathPlace))
-            {
-                currentIndividual.DeathPlace = parts[2];
-            }
+            if (eventType == "BIRT")
+                individual.BirthPlace = value;
+            else if (eventType == "DEAT")
+                individual.DeathPlace = value;
+        }
+        else if (tag == "AGNC")
+        {
+            if (eventType == "BIRT" && string.IsNullOrEmpty(individual.BirthPlace))
+                individual.BirthPlace = value;
+            else if (eventType == "DEAT" && string.IsNullOrEmpty(individual.DeathPlace))
+                individual.DeathPlace = value;
         }
     }
 
