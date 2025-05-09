@@ -11,6 +11,8 @@ public class Individual
     
     public GedcomDate? BirthDate { get; private set; }
     public GedcomDate? DeathDate { get; private set; }
+    public string? BirthPlace { get; set; }
+    public string? DeathPlace { get; set; }
 
     public Individual(string id)
     {

@@ -3,7 +3,9 @@
 @using GedBlazor.Parsers
 @inject IGedcomParser Parser
 
-<div class="gedcom-uploader">
+<div class="gedcom-uploader container-fluid px-1">
+    <h2>GEDCOM Viewer</h2>
+
     @if (!string.IsNullOrEmpty(errorMessage))
     {
         <div class="alert alert-danger" role="alert">
@@ -11,27 +13,50 @@
         </div>
     }
 
-    <InputFile OnChange="@HandleFileSelected" class="form-control" accept=".ged" />
-    <p class="mt-2">Drop GEDCOM file here or click to select (.ged files only)</p>
+    <div class="row">
+        <div class="col-12">
+            <InputFile OnChange="@HandleFileSelected" class="form-control" accept=".ged" />
+            <p class="mt-2">Drop GEDCOM file here or click to select (.ged files only)</p>
+        </div>
+    </div>
 
     @if (individuals?.Count > 0)
     {
-        <div class="table-responsive">
-            <table class="table mt-4">
+        <div class="table-responsive" style="margin-left:0.5rem;margin-right:0.5rem;">
+            <table class="table table-striped custom-zebra-table w-100 mt-4">
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>Birth</th>
-                        <th>Death</th>
+                        <th style="width: 25%;">Name</th>
+                        <th style="width: 37.5%;">Birth</th>
+                        <th style="width: 37.5%;">Death</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var individual in individuals.Values.OrderBy(i => i.FullName))
+                    @foreach (var individual in individuals.Values.OrderBy(i => i.FullName).Select((ind, idx) => new { ind, idx }))
                     {
-                        <tr>
-                            <td>@individual.FullName</td>
-                            <td>@individual.BirthDate</td>
-                            <td>@individual.DeathDate</td>
+                        var rowClass = (individual.idx % 2 == 1) ? "even-row" : string.Empty;
+                        <tr class="@rowClass">
+                            <td class="align-top">@individual.ind.FullName</td>
+                            <td>
+                                @if (individual.ind.BirthDate != null || !string.IsNullOrEmpty(individual.ind.BirthPlace))
+                                {
+                                    <div class="fw-medium">@(individual.ind.BirthDate?.ToString() ?? "")</div>
+                                    @if (!string.IsNullOrEmpty(individual.ind.BirthPlace))
+                                    {
+                                        <div class="text-muted small text-wrap">@individual.ind.BirthPlace</div>
+                                    }
+                                }
+                            </td>
+                            <td>
+                                @if (individual.ind.DeathDate != null || !string.IsNullOrEmpty(individual.ind.DeathPlace))
+                                {
+                                    <div class="fw-medium">@(individual.ind.DeathDate?.ToString() ?? "")</div>
+                                    @if (!string.IsNullOrEmpty(individual.ind.DeathPlace))
+                                    {
+                                        <div class="text-muted small text-wrap">@individual.ind.DeathPlace</div>
+                                    }
+                                }
+                            </td>
                         </tr>
                     }
                 </tbody>
@@ -39,6 +64,17 @@
         </div>
     }
 </div>
+
+<style>
+    .custom-zebra-table .even-row {
+        background-color: #f5f5f5 !important;
+    }
+    .gedcom-uploader.container-fluid {
+        max-width: 100vw;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+</style>
 
 @code {
     private Dictionary<string, Individual>? individuals;

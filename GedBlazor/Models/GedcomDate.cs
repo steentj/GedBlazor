@@ -23,23 +23,42 @@ public readonly record struct GedcomDate
             throw new ArgumentNullException(nameof(gedcomDate));
 
         var parts = gedcomDate.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        
+
         // Handle approximate dates
         if (parts[0].Equals("ABT", StringComparison.OrdinalIgnoreCase))
         {
-            return new GedcomDate(null, null, int.Parse(parts[1]), true);
+            if (parts.Length == 2 && int.TryParse(parts[1], out var abtYear))
+                return new GedcomDate(null, null, abtYear, true);
+            throw new FormatException("Invalid GEDCOM approximate date format");
         }
 
-        // Handle exact dates
+        // Handle exact dates (support both '1 JAN 1900' and '01.01.1900' and '1900')
         if (parts.Length == 3)
         {
-            var day = int.Parse(parts[0]);
-            var month = DateTime.ParseExact(parts[1], "MMM", CultureInfo.InvariantCulture).Month;
-            var year = int.Parse(parts[2]);
-            return new GedcomDate(day, month, year);
+            // Try '1 JAN 1900' format
+            if (int.TryParse(parts[0], out var day) &&
+                DateTime.TryParseExact(parts[1], new[] { "MMM", "MMMM" }, CultureInfo.InvariantCulture, DateTimeStyles.None, out var monthDate) &&
+                int.TryParse(parts[2], out var year))
+            {
+                return new GedcomDate(day, monthDate.Month, year);
+            }
+            // Try '01.01.1900' format
+            if (DateTime.TryParseExact(parts[0], "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var fullDate))
+            {
+                return new GedcomDate(fullDate.Day, fullDate.Month, fullDate.Year);
+            }
         }
-
-        throw new FormatException("Invalid GEDCOM date format");
+        // Try 'dd.MM.yyyy' as a single part
+        if (parts.Length == 1 && DateTime.TryParseExact(parts[0], "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var singleDate))
+        {
+            return new GedcomDate(singleDate.Day, singleDate.Month, singleDate.Year);
+        }
+        // Try just year
+        if (parts.Length == 1 && int.TryParse(parts[0], out var yearOnly))
+        {
+            return new GedcomDate(null, null, yearOnly);
+        }
+        throw new FormatException($"Invalid GEDCOM date format: '{gedcomDate}'");
     }
 
     public override string ToString()

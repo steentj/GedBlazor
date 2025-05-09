@@ -181,4 +181,89 @@ public class GedcomParserTests
         Assert.That(individuals["@ABCD@"].GivenName, Is.EqualTo("John"));
         Assert.That(individuals["@ABCD@"].Surname, Is.EqualTo("Doe"));
     }
+
+    [Test]
+    public void Parse_IndividualWithBirthAndDeathData_ParsesDatesAndPlaces()
+    {
+        const string gedcom = @"0 HEAD
+1 GEDC
+2 VERS 5.5.5
+1 CHAR UTF-8
+0 @I1@ INDI
+1 NAME John /Smith/
+1 BIRT
+2 DATE 1 JAN 1950
+2 PLAC Copenhagen, Denmark
+1 DEAT
+2 DATE 2 FEB 2000
+2 PLAC Aarhus, Denmark
+0 TRLR";
+
+        var (individuals, _) = parser.Parse(gedcom);
+        var ind = individuals["@I1@"];
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(ind.BirthDate, Is.Not.Null);
+            Assert.That(ind.BirthDate.ToString(), Is.EqualTo("1 JAN 1950").IgnoreCase);
+            Assert.That(ind.BirthPlace, Is.EqualTo("Copenhagen, Denmark"));
+            Assert.That(ind.DeathDate, Is.Not.Null);
+            Assert.That(ind.DeathDate.ToString(), Is.EqualTo("2 FEB 2000").IgnoreCase);
+            Assert.That(ind.DeathPlace, Is.EqualTo("Aarhus, Denmark"));
+        });
+    }
+
+    [Test]
+    public void Parse_IndividualWithBirthAndDeath_AgncAsPlace_ParsesAgncIfPlacMissing()
+    {
+        const string gedcom = @"0 HEAD
+1 GEDC
+2 VERS 5.5.5
+0 @I1@ INDI
+1 NAME Test /Person/
+1 BIRT
+2 DATE 1 JAN 1900
+2 AGNC TestBirthPlace
+1 DEAT
+2 DATE 2 FEB 2000
+2 AGNC TestDeathPlace
+0 TRLR";
+        var (individuals, _) = parser.Parse(gedcom);
+        var ind = individuals["@I1@"];
+        Assert.Multiple(() =>
+        {
+            Assert.That(ind.BirthDate, Is.Not.Null);
+            Assert.That(ind.BirthDate.ToString(), Is.EqualTo("1 JAN 1900").IgnoreCase);
+            Assert.That(ind.BirthPlace, Is.EqualTo("TestBirthPlace"));
+            Assert.That(ind.DeathDate, Is.Not.Null);
+            Assert.That(ind.DeathDate.ToString(), Is.EqualTo("2 FEB 2000").IgnoreCase);
+            Assert.That(ind.DeathPlace, Is.EqualTo("TestDeathPlace"));
+        });
+    }
+
+    [Test]
+    public void Parse_IndividualWithBirthAndDeath_PlacePrefersPlacOverAgnc()
+    {
+        const string gedcom = @"0 HEAD
+1 GEDC
+2 VERS 5.5.5
+0 @I1@ INDI
+1 NAME Test /Person/
+1 BIRT
+2 DATE 1 JAN 1900
+2 PLAC RealBirthPlace
+2 AGNC IgnoredBirthPlace
+1 DEAT
+2 DATE 2 FEB 2000
+2 PLAC RealDeathPlace
+2 AGNC IgnoredDeathPlace
+0 TRLR";
+        var (individuals, _) = parser.Parse(gedcom);
+        var ind = individuals["@I1@"];
+        Assert.Multiple(() =>
+        {
+            Assert.That(ind.BirthPlace, Is.EqualTo("RealBirthPlace"));
+            Assert.That(ind.DeathPlace, Is.EqualTo("RealDeathPlace"));
+        });
+    }
 }

@@ -168,15 +168,48 @@ public partial class GedcomParser : IGedcomParser
             return;
 
         var tag = parts[1];
-        if (currentTag == "BIRT" && tag == "DATE")
+        if (currentTag == "BIRT")
         {
-            try
+            if (tag == "DATE")
             {
-                currentIndividual.SetBirth(GedcomDate.Parse(parts[2]));
+                try
+                {
+                    currentIndividual.SetBirth(GedcomDate.Parse(parts[2]));
+                }
+                catch (Exception)
+                {
+                    // Skip invalid date formats
+                }
             }
-            catch (Exception)
+            else if (tag == "PLAC")
             {
-                // Skip invalid date formats
+                currentIndividual.BirthPlace = parts[2];
+            }
+            else if (tag == "AGNC" && string.IsNullOrEmpty(currentIndividual.BirthPlace))
+            {
+                currentIndividual.BirthPlace = parts[2];
+            }
+        }
+        else if (currentTag == "DEAT")
+        {
+            if (tag == "DATE")
+            {
+                try
+                {
+                    currentIndividual.SetDeath(GedcomDate.Parse(parts[2]));
+                }
+                catch (Exception)
+                {
+                    // Skip invalid date formats
+                }
+            }
+            else if (tag == "PLAC")
+            {
+                currentIndividual.DeathPlace = parts[2];
+            }
+            else if (tag == "AGNC" && string.IsNullOrEmpty(currentIndividual.DeathPlace))
+            {
+                currentIndividual.DeathPlace = parts[2];
             }
         }
     }
@@ -187,6 +220,6 @@ public partial class GedcomParser : IGedcomParser
         // For example, adding back-references from individuals to their families
     }
 
-    [GeneratedRegex(@"(?<given>[^/]+)/(?<surname>[^/]+)/")]
+    [System.Text.RegularExpressions.GeneratedRegex(@"(?<given>[^/]+)/(?<surname>[^/]+)/")]
     private static partial Regex NameRegex();
 }
