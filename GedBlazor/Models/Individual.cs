@@ -13,6 +13,8 @@ public class Individual
     public GedcomDate? DeathDate { get; private set; }
     public string? BirthPlace { get; set; }
     public string? DeathPlace { get; set; }
+    public string? FatherId { get; set; }
+    public string? MotherId { get; set; }
 
     public Individual(string id)
     {

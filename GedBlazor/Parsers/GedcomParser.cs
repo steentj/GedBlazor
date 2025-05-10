@@ -208,8 +208,18 @@ public partial class GedcomParser : IGedcomParser
 
     private void LinkFamilies()
     {
-        // Additional family linking logic can be added here
-        // For example, adding back-references from individuals to their families
+        foreach (var family in _families.Values)
+        {
+            var fatherId = family.Husband?.Id;
+            var motherId = family.Wife?.Id;
+            foreach (var child in family.Children)
+            {
+                if (!string.IsNullOrEmpty(fatherId))
+                    child.FatherId = fatherId;
+                if (!string.IsNullOrEmpty(motherId))
+                    child.MotherId = motherId;
+            }
+        }
     }
 
     [System.Text.RegularExpressions.GeneratedRegex(@"(?<given>[^/]+)/(?<surname>[^/]+)/")]

@@ -266,4 +266,125 @@ public class GedcomParserTests
             Assert.That(ind.DeathPlace, Is.EqualTo("RealDeathPlace"));
         });
     }
+
+    [Test]
+    public void Parse_FamilyRelations_SetsFatherAndMotherIdOnChildren()
+    {
+        const string gedcom = @"0 HEAD
+1 GEDC
+2 VERS 5.5.5
+0 @I1@ INDI
+1 NAME John /Smith/
+0 @I2@ INDI
+1 NAME Jane /Doe/
+0 @I3@ INDI
+1 NAME Junior /Smith/
+0 @F1@ FAM
+1 HUSB @I1@
+1 WIFE @I2@
+1 CHIL @I3@
+0 TRLR";
+        var parser = new GedcomParser();
+        var (individuals, families) = parser.Parse(gedcom);
+        var child = individuals["@I3@"];
+        Assert.Multiple(() =>
+        {
+            Assert.That(child.FatherId, Is.EqualTo("@I1@"));
+            Assert.That(child.MotherId, Is.EqualTo("@I2@"));
+        });
+    }
+
+    [Test]
+    public void Parse_FamilyRelations_MissingHusbandOrWife_SetsOnlyAvailableParentId()
+    {
+        const string gedcom = @"0 HEAD
+1 GEDC
+2 VERS 5.5.5
+0 @I1@ INDI
+1 NAME Jane /Doe/
+0 @I2@ INDI
+1 NAME Junior /Smith/
+0 @F1@ FAM
+1 WIFE @I1@
+1 CHIL @I2@
+0 TRLR";
+        var parser = new GedcomParser();
+        var (individuals, families) = parser.Parse(gedcom);
+        var child = individuals["@I2@"];
+        Assert.Multiple(() =>
+        {
+            Assert.That(child.FatherId, Is.Null.Or.Empty);
+            Assert.That(child.MotherId, Is.EqualTo("@I1@"));
+        });
+    }
+
+    [Test]
+    public void Parse_FamilyRelations_MultipleChildren_AllGetParentIds()
+    {
+        const string gedcom = @"0 HEAD
+1 GEDC
+2 VERS 5.5.5
+0 @I1@ INDI
+1 NAME John /Smith/
+0 @I2@ INDI
+1 NAME Jane /Doe/
+0 @I3@ INDI
+1 NAME Junior /Smith/
+0 @I4@ INDI
+1 NAME Jenny /Smith/
+0 @F1@ FAM
+1 HUSB @I1@
+1 WIFE @I2@
+1 CHIL @I3@
+1 CHIL @I4@
+0 TRLR";
+        var parser = new GedcomParser();
+        var (individuals, families) = parser.Parse(gedcom);
+        var child1 = individuals["@I3@"];
+        var child2 = individuals["@I4@"];
+        Assert.Multiple(() =>
+        {
+            Assert.That(child1.FatherId, Is.EqualTo("@I1@"));
+            Assert.That(child1.MotherId, Is.EqualTo("@I2@"));
+            Assert.That(child2.FatherId, Is.EqualTo("@I1@"));
+            Assert.That(child2.MotherId, Is.EqualTo("@I2@"));
+        });
+    }
+
+    [Test]
+    public void Parse_FamilyRelations_ChildNotInIndividuals_DoesNotThrow()
+    {
+        const string gedcom = @"0 HEAD
+1 GEDC
+2 VERS 5.5.5
+0 @I1@ INDI
+1 NAME John /Smith/
+0 @I2@ INDI
+1 NAME Jane /Doe/
+0 @F1@ FAM
+1 HUSB @I1@
+1 WIFE @I2@
+1 CHIL @I3@
+0 TRLR";
+        var parser = new GedcomParser();
+        Assert.DoesNotThrow(() => parser.Parse(gedcom));
+    }
+
+    [Test]
+    public void Parse_FamilyRelations_FamilyWithoutChildren_DoesNotThrow()
+    {
+        const string gedcom = @"0 HEAD
+1 GEDC
+2 VERS 5.5.5
+0 @I1@ INDI
+1 NAME John /Smith/
+0 @I2@ INDI
+1 NAME Jane /Doe/
+0 @F1@ FAM
+1 HUSB @I1@
+1 WIFE @I2@
+0 TRLR";
+        var parser = new GedcomParser();
+        Assert.DoesNotThrow(() => parser.Parse(gedcom));
+    }
 }
