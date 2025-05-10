@@ -40,6 +40,11 @@ This is a client-side Blazor WebAssembly application for parsing and displaying 
 
 ### 2.4 User Interface
 
+- The primary output is two pages:
+  - The Individuals Table
+  - The Treeview of the family
+- These two pages are displayed in a tab view, where the user may choose one or the other.
+
 #### 2.4.1 Individuals Table
 - A table view is displayed with all individuals and their information:
   - Anenummer
@@ -53,7 +58,12 @@ This is a client-side Blazor WebAssembly application for parsing and displaying 
 ### 2.4.2 Proband
 - The root person (proband) is selected in a drop down populated with the individuals names. 
 - After selection the "anenummer" is displayed as the first column in the individuals table. 
-- The individuals
+
+### 2.4.3 The Ancestry tree
+- Are available when the proband has been chosen
+- Show the ancestry tree from the proband in a collapsible tree view where each node is the anenummer and the ancestor name. 
+- The nodes are ordered by anenummer
+- Individuals without a anenummer are not displayed
 
 ---
 

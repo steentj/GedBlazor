@@ -1,0 +1,154 @@
+@using GedBlazor.Models
+
+@if (Proband == null || Individuals == null)
+{
+    <div class="alert alert-info">Please select a proband to view the ancestry tree.</div>
+}
+else
+{
+    <div class="ancestry-tree">
+        @RenderTree(Proband, 1)
+    </div>
+}
+
+@code {
+    [Parameter]
+    public Individual? Proband { get; set; }
+    [Parameter]
+    public Dictionary<string, Individual>? Individuals { get; set; }
+
+    private HashSet<string> expanded = new();
+    private Individual? lastProband;
+
+    protected override void OnParametersSet()
+    {
+        if (Proband?.Id != lastProband?.Id)
+        {
+            expanded.Clear();
+            if (Proband != null && Individuals != null)
+            {
+                ExpandAllAncestors(Proband);
+            }
+            lastProband = Proband;
+        }
+    }
+
+    private void ExpandAllAncestors(Individual ind)
+    {
+        if (ind == null || expanded.Contains(ind.Id) || ind.Anenummer < 1)
+            return;
+        expanded.Add(ind.Id);
+        if (!string.IsNullOrEmpty(ind.FatherId) && Individuals != null && Individuals.TryGetValue(ind.FatherId, out var father) && father.Anenummer > 0)
+        {
+            ExpandAllAncestors(father);
+        }
+        if (!string.IsNullOrEmpty(ind.MotherId) && Individuals != null && Individuals.TryGetValue(ind.MotherId, out var mother) && mother.Anenummer > 0)
+        {
+            ExpandAllAncestors(mother);
+        }
+    }
+
+    private RenderFragment RenderTree(Individual? ind, int level) => builder =>
+    {
+        if (ind == null || ind.Anenummer < 1)
+            return;
+        int seq = 0;
+        bool hasChildren = HasAncestor(ind);
+        bool isExpanded = expanded.Contains(ind.Id);
+        builder.OpenElement(seq++, "div");
+        builder.AddAttribute(seq++, "class", $"tree-node level-{level}");
+        if (hasChildren)
+        {
+            builder.OpenElement(seq++, "button");
+            builder.AddAttribute(seq++, "type", "button");
+            builder.AddAttribute(seq++, "class", $"toggle-btn btn btn-sm btn-link p-0 me-1 align-baseline");
+            builder.AddAttribute(seq++, "aria-label", isExpanded ? "Collapse node" : "Expand node");
+            builder.AddAttribute(seq++, "onclick", EventCallback.Factory.Create(this, () => ToggleExpand(ind.Id)));
+            builder.AddContent(seq++, isExpanded ? "▼" : "▶");
+            builder.CloseElement();
+        }
+        else
+        {
+            builder.OpenElement(seq++, "span");
+            builder.AddAttribute(seq++, "class", "toggle-placeholder");
+            builder.AddContent(seq++, "");
+            builder.CloseElement();
+        }
+        builder.OpenElement(seq++, "span");
+        builder.AddAttribute(seq++, "class", "tree-label");
+        builder.AddContent(seq++, $"{ind.Anenummer}: {ind.FullName}");
+        builder.CloseElement();
+        if (hasChildren && isExpanded)
+        {
+            builder.OpenElement(seq++, "div");
+            builder.AddAttribute(seq++, "class", "tree-children");
+            if (!string.IsNullOrEmpty(ind.FatherId) && Individuals != null && Individuals.TryGetValue(ind.FatherId, out var father) && father.Anenummer > 0)
+            {
+                builder.AddContent(seq++, RenderTree(father, level + 1));
+            }
+            if (!string.IsNullOrEmpty(ind.MotherId) && Individuals != null && Individuals.TryGetValue(ind.MotherId, out var mother) && mother.Anenummer > 0)
+            {
+                builder.AddContent(seq++, RenderTree(mother, level + 1));
+            }
+            builder.CloseElement(); // tree-children
+        }
+        builder.CloseElement(); // tree-node
+    };
+
+    private void ToggleExpand(string id)
+    {
+        if (expanded.Contains(id))
+            expanded.Remove(id);
+        else
+            expanded.Add(id);
+    }
+
+    private bool HasAncestor(Individual ind)
+    {
+        if (Individuals == null) return false;
+        return (!string.IsNullOrEmpty(ind.FatherId) && Individuals.TryGetValue(ind.FatherId, out var f) && f.Anenummer > 0)
+            || (!string.IsNullOrEmpty(ind.MotherId) && Individuals.TryGetValue(ind.MotherId, out var m) && m.Anenummer > 0);
+    }
+}
+
+<style>
+.ancestry-tree {
+    margin-left: 1rem;
+    margin-top: 1rem;
+    overflow-x: auto;
+}
+.tree-node {
+    margin-bottom: 0.5rem;
+    padding-left: 0.5rem;
+    border-left: 2px solid #bbb;
+    font-family: monospace;
+    display: flex;
+    align-items: baseline;
+}
+.toggle-btn {
+    width: 1.2em;
+    height: 1.2em;
+    font-size: 1em;
+    color: #555;
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-right: 0.2em;
+    vertical-align: middle;
+}
+.toggle-btn:focus {
+    outline: 1px solid #888;
+}
+.toggle-placeholder {
+    display: inline-block;
+    width: 1.2em;
+    height: 1.2em;
+    margin-right: 0.2em;
+}
+.tree-label {
+    display: inline-block;
+}
+.tree-children {
+    margin-left: 1.5rem;
+}
+</style>

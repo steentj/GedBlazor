@@ -1,6 +1,7 @@
 @using Microsoft.AspNetCore.Components.Forms
 @using GedBlazor.Models
 @using GedBlazor.Parsers
+@using GedBlazor.Components
 @inject IGedcomParser Parser
 
 <div class="gedcom-uploader container-fluid px-1">
@@ -22,69 +23,86 @@
 
     @if (individuals?.Count > 0)
     {
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <label for="probandSelect" class="form-label">Select Proband (root ancestor):</label>
-                <select id="probandSelect" class="form-select" @onchange="OnProbandChanged">
-                    <option value="">-- Select --</option>
-                    @foreach (var ind in individuals.Values.OrderBy(i => i.FullName))
-                    {
-                        <option value="@ind.Id" selected="@(ind.Id == probandId ? "selected" : null)">@ind.FullName</option>
-                    }
-                </select>
+        <div class="mb-3">
+            <ul class="nav nav-tabs">
+                <li class="nav-item">
+                    <a class="nav-link @(activeTab == "table" ? "active" : "")" href="#" @onclick='() => SetTab("table")'>Individuals Table</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(activeTab == "tree" ? "active" : "") @(string.IsNullOrEmpty(probandId) ? "disabled" : "")" href="#" @onclick='() => SetTab("tree")'>Ancestry Tree</a>
+                </li>
+            </ul>
+        </div>
+        @if (activeTab == "table")
+        {
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="probandSelect" class="form-label">Select Proband (root ancestor):</label>
+                    <select id="probandSelect" class="form-select" @onchange="OnProbandChanged">
+                        <option value="">-- Select --</option>
+                        @foreach (var ind in individuals.Values.OrderBy(i => i.FullName))
+                        {
+                            <option value="@ind.Id" selected="@(ind.Id == probandId ? "selected" : null)">@ind.FullName</option>
+                        }
+                    </select>
+                </div>
             </div>
-        </div>
-        <div class="table-responsive" style="margin-left:0.5rem;margin-right:0.5rem;">
-            <table class="table table-striped custom-zebra-table w-100 mt-4">
-                <thead>
-                    <tr>
-                        <th style="width: 7%;" @onclick='() => SortBy("Anenummer")'>Anenummer</th>
-                        <th style="width: 23%;" @onclick='() => SortBy("FullName")'>Name</th>
-                        <th style="width: 23%;" @onclick='() => SortBy("BirthDate")'>Birth</th>
-                        <th style="width: 23%;" @onclick='() => SortBy("DeathDate")'>Death</th>
-                        <th style="width: 24%;" @onclick='() => SortBy("Father")'>Father / Mother</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var individual in GetSortedIndividuals().Select((ind, idx) => new { ind, idx }))
-                    {
-                        var rowClass = (individual.idx % 2 == 1) ? "even-row" : string.Empty;
-                        <tr class="@rowClass">
-                            <td class="align-top">@(individual.ind.Anenummer > 0 ? individual.ind.Anenummer.ToString() : "")</td>
-                            <td class="align-top">@individual.ind.FullName</td>
-                            <td>
-                                @if (individual.ind.BirthDate != null || !string.IsNullOrEmpty(individual.ind.BirthPlace))
-                                {
-                                    <div class="fw-medium">@(individual.ind.BirthDate?.ToString() ?? "")</div>
-                                    @if (!string.IsNullOrEmpty(individual.ind.BirthPlace))
-                                    {
-                                        <div class="text-muted small text-wrap">@individual.ind.BirthPlace</div>
-                                    }
-                                }
-                            </td>
-                            <td>
-                                @if (individual.ind.DeathDate != null || !string.IsNullOrEmpty(individual.ind.DeathPlace))
-                                {
-                                    <div class="fw-medium">@(individual.ind.DeathDate?.ToString() ?? "")</div>
-                                    @if (!string.IsNullOrEmpty(individual.ind.DeathPlace))
-                                    {
-                                        <div class="text-muted small text-wrap">@individual.ind.DeathPlace</div>
-                                    }
-                                }
-                            </td>
-                            <td>
-                                @{
-                                    var father = !string.IsNullOrEmpty(individual.ind.FatherId) && individuals.TryGetValue(individual.ind.FatherId, out var f) ? f.FullName : null;
-                                    var mother = !string.IsNullOrEmpty(individual.ind.MotherId) && individuals.TryGetValue(individual.ind.MotherId, out var m) ? m.FullName : null;
-                                }
-                                <div>@father</div>
-                                <div>@mother</div>
-                            </td>
+            <div class="table-responsive" style="margin-left:0.5rem;margin-right:0.5rem;">
+                <table class="table table-striped custom-zebra-table w-100 mt-4">
+                    <thead>
+                        <tr>
+                            <th style="width: 7%;" @onclick='() => SortBy("Anenummer")'>Anenummer</th>
+                            <th style="width: 23%;" @onclick='() => SortBy("FullName")'>Name</th>
+                            <th style="width: 23%;" @onclick='() => SortBy("BirthDate")'>Birth</th>
+                            <th style="width: 23%;" @onclick='() => SortBy("DeathDate")'>Death</th>
+                            <th style="width: 24%;" @onclick='() => SortBy("Father")'>Father / Mother</th>
                         </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+                    </thead>
+                    <tbody>
+                        @foreach (var individual in GetSortedIndividuals().Select((ind, idx) => new { ind, idx }))
+                        {
+                            var rowClass = (individual.idx % 2 == 1) ? "even-row" : string.Empty;
+                            <tr class="@rowClass">
+                                <td class="align-top">@(individual.ind.Anenummer > 0 ? individual.ind.Anenummer.ToString() : "")</td>
+                                <td class="align-top">@individual.ind.FullName</td>
+                                <td>
+                                    @if (individual.ind.BirthDate != null || !string.IsNullOrEmpty(individual.ind.BirthPlace))
+                                    {
+                                        <div class="fw-medium">@(individual.ind.BirthDate?.ToString() ?? "")</div>
+                                        @if (!string.IsNullOrEmpty(individual.ind.BirthPlace))
+                                        {
+                                            <div class="text-muted small text-wrap">@individual.ind.BirthPlace</div>
+                                        }
+                                    }
+                                </td>
+                                <td>
+                                    @if (individual.ind.DeathDate != null || !string.IsNullOrEmpty(individual.ind.DeathPlace))
+                                    {
+                                        <div class="fw-medium">@(individual.ind.DeathDate?.ToString() ?? "")</div>
+                                        @if (!string.IsNullOrEmpty(individual.ind.DeathPlace))
+                                        {
+                                            <div class="text-muted small text-wrap">@individual.ind.DeathPlace</div>
+                                        }
+                                    }
+                                </td>
+                                <td>
+                                    @{
+                                        var father = !string.IsNullOrEmpty(individual.ind.FatherId) && individuals.TryGetValue(individual.ind.FatherId, out var f) ? f.FullName : null;
+                                        var mother = !string.IsNullOrEmpty(individual.ind.MotherId) && individuals.TryGetValue(individual.ind.MotherId, out var m) ? m.FullName : null;
+                                    }
+                                    <div>@father</div>
+                                    <div>@mother</div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else if (activeTab == "tree" && !string.IsNullOrEmpty(probandId) && individuals.TryGetValue(probandId, out var proband))
+        {
+            <AncestryTree proband="@proband" individuals="@individuals" />
+        }
     }
 </div>
 
@@ -94,6 +112,9 @@
     private string? probandId;
     private string sortColumn = "GivenName";
     private bool sortAscending = true;
+    private string activeTab = "table";
+
+    private void SetTab(string tab) => activeTab = tab;
 
     private IEnumerable<Individual> GetSortedIndividuals()
     {
