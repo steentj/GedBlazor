@@ -15,6 +15,7 @@ public class Individual
     public string? DeathPlace { get; set; }
     public string? FatherId { get; set; }
     public string? MotherId { get; set; }
+    public int Anenummer { get; set; } = -1;
 
     public Individual(string id)
     {

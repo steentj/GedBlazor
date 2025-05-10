@@ -222,6 +222,27 @@ public partial class GedcomParser : IGedcomParser
         }
     }
 
+    public void AssignAnenummer(Dictionary<string, Individual> individuals, string? probandId)
+    {
+        // Reset all anenummer values
+        foreach (var ind in individuals.Values)
+            ind.Anenummer = -1;
+        if (string.IsNullOrEmpty(probandId) || !individuals.ContainsKey(probandId))
+            return;
+        AssignAnenummerRecursive(individuals, probandId, 1);
+    }
+
+    private void AssignAnenummerRecursive(Dictionary<string, Individual> individuals, string? id, int anenummer)
+    {
+        if (string.IsNullOrEmpty(id) || !individuals.TryGetValue(id, out var ind) || ind.Anenummer > 0)
+            return;
+        ind.Anenummer = anenummer;
+        if (!string.IsNullOrEmpty(ind.FatherId))
+            AssignAnenummerRecursive(individuals, ind.FatherId, 2 * anenummer);
+        if (!string.IsNullOrEmpty(ind.MotherId))
+            AssignAnenummerRecursive(individuals, ind.MotherId, 2 * anenummer + 1);
+    }
+
     [System.Text.RegularExpressions.GeneratedRegex(@"(?<given>[^/]+)/(?<surname>[^/]+)/")]
     private static partial Regex NameRegex();
 }

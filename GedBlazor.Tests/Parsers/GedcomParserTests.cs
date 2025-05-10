@@ -387,4 +387,99 @@ public class GedcomParserTests
         var parser = new GedcomParser();
         Assert.DoesNotThrow(() => parser.Parse(gedcom));
     }
+
+    [Test]
+    public void AssignAnenummer_AssignsCorrectNumbersToAncestors()
+    {
+        const string gedcom = @"0 HEAD
+1 GEDC
+2 VERS 5.5.5
+0 @I1@ INDI
+1 NAME Proband /Test/
+0 @I2@ INDI
+1 NAME Father /Test/
+0 @I3@ INDI
+1 NAME Mother /Test/
+0 @I4@ INDI
+1 NAME PaternalFather /Test/
+0 @I5@ INDI
+1 NAME PaternalMother /Test/
+0 @I6@ INDI
+1 NAME MaternalFather /Test/
+0 @I7@ INDI
+1 NAME MaternalMother /Test/
+0 @F1@ FAM
+1 HUSB @I2@
+1 WIFE @I3@
+1 CHIL @I1@
+0 @F2@ FAM
+1 HUSB @I4@
+1 WIFE @I5@
+1 CHIL @I2@
+0 @F3@ FAM
+1 HUSB @I6@
+1 WIFE @I7@
+1 CHIL @I3@
+0 TRLR";
+        var parser = new GedcomParser();
+        var (individuals, families) = parser.Parse(gedcom);
+        parser.AssignAnenummer(individuals, "@I1@");
+        Assert.Multiple(() =>
+        {
+            Assert.That(individuals["@I1@"].Anenummer, Is.EqualTo(1));
+            Assert.That(individuals["@I2@"].Anenummer, Is.EqualTo(2));
+            Assert.That(individuals["@I3@"].Anenummer, Is.EqualTo(3));
+            Assert.That(individuals["@I4@"].Anenummer, Is.EqualTo(4));
+            Assert.That(individuals["@I5@"].Anenummer, Is.EqualTo(5));
+            Assert.That(individuals["@I6@"].Anenummer, Is.EqualTo(6));
+            Assert.That(individuals["@I7@"].Anenummer, Is.EqualTo(7));
+        });
+    }
+
+    [Test]
+    public void AssignAnenummer_HandlesMissingAncestorsAndNonAncestors()
+    {
+        const string gedcom = @"0 HEAD
+1 GEDC
+2 VERS 5.5.5
+0 @I1@ INDI
+1 NAME Proband /Test/
+0 @I2@ INDI
+1 NAME Father /Test/
+0 @I3@ INDI
+1 NAME Mother /Test/
+0 @I4@ INDI
+1 NAME Sibling /Test/
+0 @F1@ FAM
+1 HUSB @I2@
+1 WIFE @I3@
+1 CHIL @I1@
+1 CHIL @I4@
+0 TRLR";
+        var parser = new GedcomParser();
+        var (individuals, families) = parser.Parse(gedcom);
+        parser.AssignAnenummer(individuals, "@I1@");
+        Assert.Multiple(() =>
+        {
+            Assert.That(individuals["@I1@"].Anenummer, Is.EqualTo(1));
+            Assert.That(individuals["@I2@"].Anenummer, Is.EqualTo(2));
+            Assert.That(individuals["@I3@"].Anenummer, Is.EqualTo(3));
+            Assert.That(individuals["@I4@"].Anenummer, Is.EqualTo(-1)); // Sibling, not in direct line
+        });
+    }
+
+    [Test]
+    public void AssignAnenummer_InvalidProbandId_DoesNotThrowAndNoNumbersAssigned()
+    {
+        const string gedcom = @"0 HEAD
+1 GEDC
+2 VERS 5.5.5
+0 @I1@ INDI
+1 NAME Proband /Test/
+0 TRLR";
+        var parser = new GedcomParser();
+        var (individuals, families) = parser.Parse(gedcom);
+        parser.AssignAnenummer(individuals, "@NONEXISTENT@");
+        Assert.That(individuals["@I1@"].Anenummer, Is.EqualTo(-1));
+    }
 }

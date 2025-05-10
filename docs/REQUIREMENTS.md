@@ -32,16 +32,28 @@ This is a client-side Blazor WebAssembly application for parsing and displaying 
   - `FatherId`: reference to the father's GEDCOM ID.
   - `MotherId`: reference to the mother's GEDCOM ID.
 
-### 2.3 User Interface
+### 2.3 Define the family tree
+- One individual is selected as root person ("Proband") and given "Anenummer" = 1
+- The individual is selected by the user after the parsing of the GEDCOM file.
+- The rest of the persons are, where possible, given Anenummer according to the Kekule von Stadonitz system (see addendum). Cousins, siblings etc which cannot be numbered get a -1 as number.
 
-#### 2.3.1 Individuals Table
+
+### 2.4 User Interface
+
+#### 2.4.1 Individuals Table
 - A table view is displayed with all individuals and their information:
+  - Anenummer
   - Name
   - Date/place of birth
   - Date/place of death
   - Father and mother (names, if resolvable)
+- The table is sorted on the first name of the individuals initially.
+- The user may sort the table on any column by clicking on the column header. Clickin sorts alternately ascending and descending.
 
-- The table supports sorting by name or birth date (optional).
+### 2.4.2 Proband
+- The root person (proband) is selected in a drop down populated with the individuals names. 
+- After selection the "anenummer" is displayed as the first column in the individuals table. 
+- The individuals
 
 ---
 
@@ -80,3 +92,39 @@ This is a client-side Blazor WebAssembly application for parsing and displaying 
 | INDI | A GEDCOM tag denoting an individual person. |
 | FAM  | A GEDCOM tag defining a family group (parents and children). |
 | GEDCOM ID | A unique identifier like `@I123@` for individuals or `@F45@` for families. |
+
+## Addendums
+### Kekulé von Stradonitz Numbering System (Sosa–Stradonitz / Ahnentafel)
+
+The **Kekulé von Stradonitz system** is a genealogical numbering method used to identify individuals in a **direct ancestral line** of a person (the "proband" or starting person). It does **not** include siblings, cousins, or other collateral relatives.
+
+#### Basic Rules:
+- The **proband** (starting person) is assigned **number 1**.
+- The **father** of any person `n` is assigned **2 × n**.
+- The **mother** of any person `n` is assigned **2 × n + 1**.
+- This continues recursively for each generation.
+
+### Example:
+| Person             | Number |
+|--------------------|--------|
+| Proband            | 1      |
+| Father             | 2      |
+| Mother             | 3      |
+| Paternal Grandfather | 4    |
+| Paternal Grandmother | 5    |
+| Maternal Grandfather | 6    |
+| Maternal Grandmother | 7    |
+
+- Person 1's father is 2, and mother is 3.
+- Person 2 (the father) has father 4 and mother 5.
+- Person 3 (the mother) has father 6 and mother 7.
+
+#### Notes:
+- The system forms a **binary tree**, where:
+  - Even numbers are **fathers**.
+  - Odd numbers (except 1) are **mothers**.
+- **Siblings**, **cousins**, **aunts/uncles**, and **descendants** are **not numbered** in this system.
+- It is ideal for compact and systematic representation of **ancestral lines** only.
+
+#### Related Terms:
+- Also known as the **Ahnentafel** (German for "ancestor table") or **Sosa–Stradonitz** system (named after Jerónimo de Sosa and Stephan Kekulé von Stradonitz).
