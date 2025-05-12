@@ -7,7 +7,7 @@
         {
             <div class="info">
                 <div class="anenummer" aria-label="Anenummer">@AnenNumber</div>
-                <div class="name" aria-label="Name">@Individual.FullName</div>
+                <div class="name" aria-label="Navn">@Individual.FullName</div>
                 <div class="details">
                     @if (Individual.BirthDate != null)
                     {
@@ -31,7 +31,7 @@
         else
         {
             <div class="info minimal">
-                <div class="content" aria-label="Ancestor @AnenNumber">
+                <div class="content" aria-label="Ane @AnenNumber">
                     @AnenNumber @Individual.FullName
                     @if (Individual.BirthDate != null)
                     {
@@ -47,7 +47,7 @@
     }
     else
     {
-        <div class="empty">No ancestor (@AnenNumber)</div>
+        <div class="empty">Ingen ane (@AnenNumber)</div>
     }
 </div>
 

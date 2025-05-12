@@ -31,7 +31,7 @@ public class AnetavleCellTests
             .Add(p => p.AnenNumber, 1));
 
         // Assert
-        Assert.That(cut.Find(".empty").TextContent, Does.Contain("No ancestor (1)"));
+        Assert.That(cut.Find(".empty").TextContent, Does.Contain("Ingen ane (1)"));
     }
 
     [Test]

@@ -5,7 +5,7 @@
 @inject IGedcomParser Parser
 
 <div class="gedcom-uploader container-fluid px-1">
-    <h2>GEDCOM Viewer</h2>
+    <h2>GEDCOM Viser</h2>
 
     @if (!string.IsNullOrEmpty(errorMessage))
     {
@@ -17,7 +17,7 @@
     <div class="row">
         <div class="col-12">
             <InputFile OnChange="@HandleFileSelected" class="form-control" accept=".ged" />
-            <p class="mt-2">Drop GEDCOM file here or click to select (.ged files only)</p>
+            <p class="mt-2">Træk GEDCOM-fil hertil eller klik for at vælge (kun .ged filer)</p>
         </div>
     </div>
 
@@ -26,10 +26,10 @@
         <div class="mb-3">
             <ul class="nav nav-tabs">
                 <li class="nav-item">
-                    <a class="nav-link @(activeTab == "table" ? "active" : "")" href="#" @onclick='() => SetTab("table")'>Individuals Table</a>
+                    <a class="nav-link @(activeTab == "table" ? "active" : "")" href="#" @onclick='() => SetTab("table")'>Personer</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link @(activeTab == "tree" ? "active" : "") @(string.IsNullOrEmpty(probandId) ? "disabled" : "")" href="#" @onclick='() => SetTab("tree")'>Ancestry Tree</a>
+                    <a class="nav-link @(activeTab == "tree" ? "active" : "") @(string.IsNullOrEmpty(probandId) ? "disabled" : "")" href="#" @onclick='() => SetTab("tree")'>Slægtstræ</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link @(activeTab == "anetavle" ? "active" : "") @(string.IsNullOrEmpty(probandId) ? "disabled" : "")" href="#" @onclick='() => SetTab("anetavle")'>Anetavle</a>
@@ -40,9 +40,9 @@
         {
             <div class="row mb-3">
                 <div class="col-md-6">
-                    <label for="probandSelect" class="form-label">Select Proband (root ancestor):</label>
+                    <label for="probandSelect" class="form-label">Vælg proband (rodperson):</label>
                     <select id="probandSelect" class="form-select" @onchange="OnProbandChanged">
-                        <option value="">-- Select --</option>
+                        <option value="">-- Vælg --</option>
                         @foreach (var ind in individuals.Values.OrderBy(i => i.FullName))
                         {
                             <option value="@ind.Id" selected="@(ind.Id == probandId ? "selected" : null)">@ind.FullName</option>
@@ -55,10 +55,10 @@
                     <thead>
                         <tr>
                             <th style="width: 7%;" @onclick='() => SortBy("Anenummer")'>Anenummer</th>
-                            <th style="width: 23%;" @onclick='() => SortBy("FullName")'>Name</th>
-                            <th style="width: 23%;" @onclick='() => SortBy("BirthDate")'>Birth</th>
-                            <th style="width: 23%;" @onclick='() => SortBy("DeathDate")'>Death</th>
-                            <th style="width: 24%;" @onclick='() => SortBy("Father")'>Father / Mother</th>
+                            <th style="width: 23%;" @onclick='() => SortBy("FullName")'>Navn</th>
+                            <th style="width: 23%;" @onclick='() => SortBy("BirthDate")'>Fødsel</th>
+                            <th style="width: 23%;" @onclick='() => SortBy("DeathDate")'>Død</th>
+                            <th style="width: 24%;" @onclick='() => SortBy("Father")'>Far / mor</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -166,7 +166,7 @@
 
             if (!file.Name.EndsWith(".ged", StringComparison.OrdinalIgnoreCase))
             {
-                errorMessage = "Please select a valid GEDCOM file (.ged)";
+                errorMessage = "Vælg venligst en gyldig GEDCOM-fil (.ged)";
                 return;
             }
 
@@ -178,17 +178,17 @@
                 Parser.AssignAnenummer(individuals, null);
             if (individuals == null || individuals.Count == 0)
             {
-                errorMessage = "No individuals found in the GEDCOM file";
+                errorMessage = "Ingen personer fundet i GEDCOM-filen";
             }
         }
         catch (FormatException)
         {
-            errorMessage = "Invalid GEDCOM file format";
+            errorMessage = "Ugyldigt GEDCOM-filformat";
             individuals = null;
         }
         catch (Exception ex)
         {
-            errorMessage = $"Error processing file: {ex.Message}";
+            errorMessage = $"Fejl under behandling af fil: {ex.Message}";
             individuals = null;
         }
     }

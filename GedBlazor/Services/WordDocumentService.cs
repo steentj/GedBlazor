@@ -9,7 +9,7 @@ namespace GedBlazor.Services;
 /// <summary>
 /// Service for generating Word documents from genealogical data
 /// </summary>
-public class WordDocumentService
+public class WordDocumentService : IWordDocumentService
 {
     /// <summary>
     /// Generates a Word document (.docx) containing the Anetavle (ancestor table)

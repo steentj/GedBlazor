@@ -37,7 +37,7 @@ public class GedcomUploaderTests
         var cut = ctx.RenderComponent<GedcomUploader>();
 
         // Assert
-        Assert.That(cut.Find("p").TextContent, Does.Contain("Drop GEDCOM file here"));
+        Assert.That(cut.Find("p").TextContent, Does.Contain("Træk GEDCOM-fil hertil"));
     }
 
     [Test]
@@ -96,7 +96,7 @@ public class GedcomUploaderTests
 
         // Assert
         var error = cut.Find(".alert-danger");
-        Assert.That(error.TextContent, Does.Contain("Invalid GEDCOM file format"));
+        Assert.That(error.TextContent, Does.Contain("Ugyldigt GEDCOM-filformat"));
     }
 
     private class MockBrowserFile : IBrowserFile

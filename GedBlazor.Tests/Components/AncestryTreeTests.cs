@@ -30,7 +30,7 @@ public class AncestryTreeTests
         var cut = ctx.RenderComponent<AncestryTree>(parameters =>
             parameters.Add(p => p.Proband, null)
                       .Add(p => p.Individuals, null));
-        Assert.That(cut.Markup, Does.Contain("Please select a proband"));
+        Assert.That(cut.Markup, Does.Contain("Vælg venligst en proband for at se slægtstræet."));
     }
 
     [Test]

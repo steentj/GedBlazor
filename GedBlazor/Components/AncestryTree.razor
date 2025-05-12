@@ -2,7 +2,7 @@
 
 @if (Proband == null || Individuals == null)
 {
-    <div class="alert alert-info">Please select a proband to view the ancestry tree.</div>
+    <div class="alert alert-info">Vælg venligst en proband for at se slægtstræet.</div>
 }
 else
 {
@@ -62,7 +62,7 @@ else
             builder.OpenElement(seq++, "button");
             builder.AddAttribute(seq++, "type", "button");
             builder.AddAttribute(seq++, "class", $"toggle-btn btn btn-sm btn-link p-0 me-1 align-baseline");
-            builder.AddAttribute(seq++, "aria-label", isExpanded ? "Collapse node" : "Expand node");
+            builder.AddAttribute(seq++, "aria-label", isExpanded ? "Fold sammen" : "Fold ud");
             builder.AddAttribute(seq++, "onclick", EventCallback.Factory.Create(this, () => ToggleExpand(ind.Id)));
             builder.AddContent(seq++, isExpanded ? "▼" : "▶");
             builder.CloseElement();

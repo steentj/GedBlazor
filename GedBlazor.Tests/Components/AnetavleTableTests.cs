@@ -1,6 +1,9 @@
 using Bunit;
 using GedBlazor.Components;
 using GedBlazor.Models;
+using GedBlazor.Services;
+using Microsoft.Extensions.DependencyInjection;
+using Moq;
 using NUnit.Framework;
 using System.Collections.Generic;
 
@@ -10,11 +13,21 @@ namespace GedBlazor.Tests.Components;
 public class AnetavleTableTests
 {
     private Bunit.TestContext ctx;
+    private Mock<IFileDownloadService> mockFileDownloadService;
+    private Mock<IWordDocumentService> mockWordDocumentService;
 
     [SetUp]
     public void Setup()
     {
         ctx = new Bunit.TestContext();
+        
+        // Set up mocks
+        mockFileDownloadService = new Mock<IFileDownloadService>();
+        mockWordDocumentService = new Mock<IWordDocumentService>();
+        
+        // Register services
+        ctx.Services.AddSingleton<IFileDownloadService>(mockFileDownloadService.Object);
+        ctx.Services.AddSingleton<IWordDocumentService>(mockWordDocumentService.Object);
     }
 
     [TearDown]
@@ -30,7 +43,7 @@ public class AnetavleTableTests
         var cut = ctx.RenderComponent<AnetavleTable>();
 
         // Assert
-        Assert.That(cut.Find(".alert-info").TextContent, Does.Contain("Please select a proband"));
+        Assert.That(cut.Find(".alert-info").TextContent, Does.Contain("Vælg venligst en proband for at se anetavlen."));
     }
 
     [Test]

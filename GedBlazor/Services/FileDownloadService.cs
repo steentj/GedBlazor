@@ -5,7 +5,7 @@ namespace GedBlazor.Services;
 /// <summary>
 /// Service for file download operations in the browser using JS Interop
 /// </summary>
-public class FileDownloadService
+public class FileDownloadService : IFileDownloadService
 {
     private readonly IJSRuntime _jsRuntime;
 

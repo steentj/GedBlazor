@@ -1,11 +1,11 @@
 @using GedBlazor.Models
 @using GedBlazor.Services
-@inject WordDocumentService WordDocumentService
-@inject FileDownloadService FileDownloadService
+@inject IWordDocumentService WordDocumentService
+@inject IFileDownloadService FileDownloadService
 
 @if (Proband == null || Individuals == null)
 {
-    <div class="alert alert-info" role="alert">Please select a proband to view the anetavle (ancestor table).</div>
+    <div class="alert alert-info" role="alert">Vælg venligst en proband for at se anetavlen.</div>
 }
 else
 {
@@ -14,17 +14,17 @@ else
             @if (isDownloading)
             {
                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                <span> Generating document...</span>
+                <span> Opretter dokument...</span>
             }
             else
             {
-                <span>Download as Word (.docx)</span>
+                <span>Download som Word (.docx)</span>
             }
         </button>
     </div>
 
-    <div class="anetavle" aria-label="Ancestor Table - Anetavle">
-        <div class="generation great-grandparents" aria-label="Great-grandparents generation">
+    <div class="anetavle" aria-label="Anetavle">
+        <div class="generation great-grandparents" aria-label="Oldeforældre-generation">
             <AnetavleCell Individual="@GetAncestor(8)" AnenNumber="8" ShowMinimal="true" />
             <AnetavleCell Individual="@GetAncestor(9)" AnenNumber="9" ShowMinimal="true" />
             <AnetavleCell Individual="@GetAncestor(10)" AnenNumber="10" ShowMinimal="true" />
@@ -34,13 +34,13 @@ else
             <AnetavleCell Individual="@GetAncestor(14)" AnenNumber="14" ShowMinimal="true" />
             <AnetavleCell Individual="@GetAncestor(15)" AnenNumber="15" ShowMinimal="true" />
         </div>
-        <div class="generation grandparents" aria-label="Grandparents generation">
+        <div class="generation grandparents" aria-label="Bedsteforældre-generation">
             <AnetavleCell Individual="@GetAncestor(4)" AnenNumber="4" ShowMinimal="true" />
             <AnetavleCell Individual="@GetAncestor(5)" AnenNumber="5" ShowMinimal="true" />
             <AnetavleCell Individual="@GetAncestor(6)" AnenNumber="6" ShowMinimal="true" />
             <AnetavleCell Individual="@GetAncestor(7)" AnenNumber="7" ShowMinimal="true" />
         </div>
-        <div class="generation parents" aria-label="Parents generation">
+        <div class="generation parents" aria-label="Forældre-generation">
             <AnetavleCell Individual="@GetAncestor(2)" AnenNumber="2" />
             <AnetavleCell Individual="@GetAncestor(3)" AnenNumber="3" />
         </div>
