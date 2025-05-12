@@ -31,6 +31,9 @@
                 <li class="nav-item">
                     <a class="nav-link @(activeTab == "tree" ? "active" : "") @(string.IsNullOrEmpty(probandId) ? "disabled" : "")" href="#" @onclick='() => SetTab("tree")'>Ancestry Tree</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link @(activeTab == "anetavle" ? "active" : "") @(string.IsNullOrEmpty(probandId) ? "disabled" : "")" href="#" @onclick='() => SetTab("anetavle")'>Anetavle</a>
+                </li>
             </ul>
         </div>
         @if (activeTab == "table")
@@ -102,6 +105,10 @@
         else if (activeTab == "tree" && !string.IsNullOrEmpty(probandId) && individuals.TryGetValue(probandId, out var proband))
         {
             <AncestryTree proband="@proband" individuals="@individuals" />
+        }
+        else if (activeTab == "anetavle" && !string.IsNullOrEmpty(probandId) && individuals.TryGetValue(probandId, out var anetavleProband))
+        {
+            <AnetavleTable proband="@anetavleProband" individuals="@individuals" />
         }
     }
 </div>

@@ -1,0 +1,90 @@
+@using GedBlazor.Models
+
+@if (Proband == null || Individuals == null)
+{
+    <div class="alert alert-info">Please select a proband to view the anetavle (ancestor table).</div>
+}
+else
+{
+    <div class="anetavle">
+        <div class="generation great-grandparents">
+            <AnetavleCell Individual="@GetAncestor(8)" AnenNumber="8" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(9)" AnenNumber="9" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(10)" AnenNumber="10" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(11)" AnenNumber="11" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(12)" AnenNumber="12" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(13)" AnenNumber="13" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(14)" AnenNumber="14" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(15)" AnenNumber="15" ShowMinimal="true" />
+        </div>
+        <div class="generation grandparents">
+            <AnetavleCell Individual="@GetAncestor(4)" AnenNumber="4" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(5)" AnenNumber="5" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(6)" AnenNumber="6" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(7)" AnenNumber="7" ShowMinimal="true" />
+        </div>
+        <div class="generation parents">
+            <AnetavleCell Individual="@GetAncestor(2)" AnenNumber="2" />
+            <AnetavleCell Individual="@GetAncestor(3)" AnenNumber="3" />
+        </div>
+        <div class="generation proband">
+            <AnetavleCell Individual="@Proband" AnenNumber="1" />
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public Individual? Proband { get; set; }
+    
+    [Parameter]
+    public Dictionary<string, Individual>? Individuals { get; set; }
+
+    private Individual? GetAncestor(int anenummer)
+    {
+        if (Individuals == null) return null;
+        return Individuals.Values.FirstOrDefault(i => i.Anenummer == anenummer);
+    }
+}
+
+<style>
+.anetavle {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+    align-items: center;
+}
+
+.generation {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    width: 100%;
+}
+
+.great-grandparents {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 0.5rem;
+}
+
+.grandparents {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+}
+
+.parents {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.proband {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    width: 25%;
+}
+</style>
