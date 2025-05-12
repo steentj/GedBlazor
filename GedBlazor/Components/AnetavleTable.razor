@@ -2,12 +2,12 @@
 
 @if (Proband == null || Individuals == null)
 {
-    <div class="alert alert-info">Please select a proband to view the anetavle (ancestor table).</div>
+    <div class="alert alert-info" role="alert">Please select a proband to view the anetavle (ancestor table).</div>
 }
 else
 {
-    <div class="anetavle">
-        <div class="generation great-grandparents">
+    <div class="anetavle" aria-label="Ancestor Table - Anetavle">
+        <div class="generation great-grandparents" aria-label="Great-grandparents generation">
             <AnetavleCell Individual="@GetAncestor(8)" AnenNumber="8" ShowMinimal="true" />
             <AnetavleCell Individual="@GetAncestor(9)" AnenNumber="9" ShowMinimal="true" />
             <AnetavleCell Individual="@GetAncestor(10)" AnenNumber="10" ShowMinimal="true" />
@@ -17,29 +17,40 @@ else
             <AnetavleCell Individual="@GetAncestor(14)" AnenNumber="14" ShowMinimal="true" />
             <AnetavleCell Individual="@GetAncestor(15)" AnenNumber="15" ShowMinimal="true" />
         </div>
-        <div class="generation grandparents">
+        <div class="generation grandparents" aria-label="Grandparents generation">
             <AnetavleCell Individual="@GetAncestor(4)" AnenNumber="4" ShowMinimal="true" />
             <AnetavleCell Individual="@GetAncestor(5)" AnenNumber="5" ShowMinimal="true" />
             <AnetavleCell Individual="@GetAncestor(6)" AnenNumber="6" ShowMinimal="true" />
             <AnetavleCell Individual="@GetAncestor(7)" AnenNumber="7" ShowMinimal="true" />
         </div>
-        <div class="generation parents">
+        <div class="generation parents" aria-label="Parents generation">
             <AnetavleCell Individual="@GetAncestor(2)" AnenNumber="2" />
             <AnetavleCell Individual="@GetAncestor(3)" AnenNumber="3" />
         </div>
-        <div class="generation proband">
+        <div class="generation proband" aria-label="Proband">
             <AnetavleCell Individual="@Proband" AnenNumber="1" />
         </div>
     </div>
 }
 
 @code {
+    /// <summary>
+    /// The individual (proband) for which to display the ancestor table.
+    /// </summary>
     [Parameter]
     public Individual? Proband { get; set; }
     
+    /// <summary>
+    /// Dictionary of all individuals in the GEDCOM file.
+    /// </summary>
     [Parameter]
     public Dictionary<string, Individual>? Individuals { get; set; }
 
+    /// <summary>
+    /// Finds an individual with the specified Anenummer.
+    /// </summary>
+    /// <param name="anenummer">The Anenummer to search for.</param>
+    /// <returns>The individual with the specified Anenummer or null if not found.</returns>
     private Individual? GetAncestor(int anenummer)
     {
         if (Individuals == null) return null;
@@ -86,5 +97,26 @@ else
     grid-template-columns: 1fr;
     gap: 1rem;
     width: 25%;
+}
+
+/* Responsive adjustments */
+@@media (max-width: 992px) {
+    .great-grandparents {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .grandparents {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .parents, .proband {
+        grid-template-columns: 1fr;
+    }
+}
+
+@@media (max-width: 576px) {
+    .great-grandparents {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 </style>

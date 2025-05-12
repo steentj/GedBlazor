@@ -40,10 +40,11 @@ This is a client-side Blazor WebAssembly application for parsing and displaying 
 
 ### 2.4 User Interface
 
-- The primary output is two pages:
+- The primary output is three pages:
   - The Individuals Table
-  - The Treeview of the family
-- These two pages are displayed in a tab view, where the user may choose one or the other.
+  - The Ancestry Tree
+  - The Anetavle (ancestor table)
+- These three pages are displayed in a tab view, where the user may choose one.
 
 #### 2.4.1 Individuals Table
 - A table view is displayed with all individuals and their information:
@@ -60,10 +61,38 @@ This is a client-side Blazor WebAssembly application for parsing and displaying 
 - After selection the "anenummer" is displayed as the first column in the individuals table. 
 
 ### 2.4.3 The Ancestry tree
-- Are available when the proband has been chosen
-- Show the ancestry tree from the proband in a collapsible tree view where each node is the anenummer and the ancestor name. 
+- Is available when the proband has been chosen
+- Shows the ancestry tree from the proband in a collapsible tree view where each node is the anenummer and the ancestor name
 - The nodes are ordered by anenummer
-- Individuals without a anenummer are not displayed
+- Individuals without an anenummer are not displayed
+
+### 2.4.4 The Anetavle (Ancestor Table)
+- Is available when the proband has been chosen
+- Shows direct ancestors up to 4 generations in a traditional table format:
+  - Bottom row: Proband
+  - Second row: Parents (Far/Mor)
+  - Third row: Grandparents (Farfar/Farmor/Morfar/Mormor)
+  - Top row: Great-grandparents (8 ancestors)
+- Each cell displays:
+  - Detailed view (parents and proband): Anenummer, name, birth/death dates and places
+  - Compact view (grandparents and great-grandparents): Anenummer, name, birth/death dates only, displayed vertically
+- The layout resembles a traditional printed Anetavle with ancestors organized by generation
+- Uses the Kekulé von Stradonitz System for numbering:
+  - Proband: 1
+  - Father: 2 (2n for any individual's father)
+  - Mother: 3 (2n+1 for any individual's mother)
+  - Paternal Grandfather: 4
+  - Paternal Grandmother: 5
+  - Maternal Grandfather: 6
+  - Maternal Grandmother: 7
+  - And so on for great-grandparents (8-15)
+- Cells are visually distinct by generation:
+  - Proband's cell has a highlight color
+  - Parents cells have a subtler highlight
+  - Empty cells where an ancestor is unknown are clearly marked
+- The display is responsive and adapts to different screen sizes:
+  - On small screens, the layout restructures to accommodate narrower viewports
+  - Vertical text is used for higher generations to optimize space
 
 ---
 

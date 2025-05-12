@@ -1,13 +1,13 @@
 @using GedBlazor.Models
 
-<div class="anetavle-cell">
+<div class="anetavle-cell" data-anenummer="@AnenNumber">
     @if (Individual != null)
     {
         @if (!ShowMinimal)
         {
             <div class="info">
-                <div class="anenummer">@AnenNumber</div>
-                <div class="name">@Individual.FullName</div>
+                <div class="anenummer" aria-label="Anenummer">@AnenNumber</div>
+                <div class="name" aria-label="Name">@Individual.FullName</div>
                 <div class="details">
                     @if (Individual.BirthDate != null)
                     {
@@ -31,7 +31,7 @@
         else
         {
             <div class="info minimal">
-                <div class="content">
+                <div class="content" aria-label="Ancestor @AnenNumber">
                     @AnenNumber @Individual.FullName
                     @if (Individual.BirthDate != null)
                     {
@@ -52,12 +52,23 @@
 </div>
 
 @code {
+    /// <summary>
+    /// The individual to display in this cell.
+    /// </summary>
     [Parameter]
     public Individual? Individual { get; set; }
 
+    /// <summary>
+    /// The Anenummer (ancestor number) according to the Kekulé von Stradonitz System.
+    /// The numbering starts with 1 for the proband, 2 for the father, 3 for the mother, etc.
+    /// </summary>
     [Parameter]
     public int AnenNumber { get; set; }
 
+    /// <summary>
+    /// When true, displays a minimal vertical view for grandparents and great-grandparents.
+    /// When false, displays a detailed horizontal view for the proband and parents.
+    /// </summary>
     [Parameter]
     public bool ShowMinimal { get; set; }
 }
@@ -123,5 +134,22 @@
     justify-content: center;
     height: 100%;
     text-align: center;
+}
+
+/* Hover effect for cells */
+.anetavle-cell:hover {
+    border-color: #0078d4;
+    box-shadow: 0 0 5px rgba(0, 120, 212, 0.5);
+    transition: all 0.2s ease;
+}
+
+/* Custom styling for different generations */
+.anetavle-cell[data-anenummer="1"] {
+    background-color: #e6f7ff;
+}
+
+.anetavle-cell[data-anenummer="2"], 
+.anetavle-cell[data-anenummer="3"] {
+    background-color: #f0f5ff;
 }
 </style>
