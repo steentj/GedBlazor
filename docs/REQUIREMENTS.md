@@ -93,6 +93,11 @@ This is a client-side Blazor WebAssembly application for parsing and displaying 
 - The display is responsive and adapts to different screen sizes:
   - On small screens, the layout restructures to accommodate narrower viewports
   - Vertical text is used for higher generations to optimize space
+- The Anetavle can be exported as a Word document (.docx):
+  - The exported document maintains the same format as the on-screen display
+  - The document is formatted to fit on a single A4 page in portrait orientation
+  - All export processing happens client-side in the browser
+  - The user can download the document directly to their device
 
 ---
 

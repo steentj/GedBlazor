@@ -11,6 +11,10 @@ A client-side Blazor WebAssembly application for parsing and displaying genealog
   - Death date and place
   - Family relationships (parents)
 - Interactive table view with all individuals
+- Select a proband (root person) to visualize ancestry:
+  - View ancestral tree with collapsible nodes
+  - Display traditional Anetavle (ancestor table) up to 4 generations
+  - Export Anetavle as Word document (.docx) formatted for A4 printing
 - Completely client-side processing with no server uploads
 - Built with Blazor WebAssembly for modern web performance
 
@@ -57,6 +61,8 @@ dotnet test
 - Built with .NET 9.0 and Blazor WebAssembly
 - Implements GEDCOM 5.5/5.5.1 parsing
 - Uses in-memory storage for parsed genealogical data
+- Client-side document generation with OpenXML
+- JavaScript interop for browser-based file downloads
 - No external services or backend dependencies
 
 ## Limitations

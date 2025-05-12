@@ -1,4 +1,7 @@
 @using GedBlazor.Models
+@using GedBlazor.Services
+@inject WordDocumentService WordDocumentService
+@inject FileDownloadService FileDownloadService
 
 @if (Proband == null || Individuals == null)
 {
@@ -6,6 +9,20 @@
 }
 else
 {
+    <div class="anetavle-actions mb-3">
+        <button class="btn btn-primary" @onclick="DownloadAsWord" disabled="@isDownloading">
+            @if (isDownloading)
+            {
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <span> Generating document...</span>
+            }
+            else
+            {
+                <span>Download as Word (.docx)</span>
+            }
+        </button>
+    </div>
+
     <div class="anetavle" aria-label="Ancestor Table - Anetavle">
         <div class="generation great-grandparents" aria-label="Great-grandparents generation">
             <AnetavleCell Individual="@GetAncestor(8)" AnenNumber="8" ShowMinimal="true" />
@@ -47,6 +64,11 @@ else
     public Dictionary<string, Individual>? Individuals { get; set; }
 
     /// <summary>
+    /// Flag to indicate if document download is in progress
+    /// </summary>
+    private bool isDownloading = false;
+
+    /// <summary>
     /// Finds an individual with the specified Anenummer.
     /// </summary>
     /// <param name="anenummer">The Anenummer to search for.</param>
@@ -55,6 +77,40 @@ else
     {
         if (Individuals == null) return null;
         return Individuals.Values.FirstOrDefault(i => i.Anenummer == anenummer);
+    }
+
+    /// <summary>
+    /// Handles the download of the Anetavle as a Word document
+    /// </summary>
+    private async Task DownloadAsWord()
+    {
+        if (Proband == null || Individuals == null) return;
+        
+        try
+        {
+            isDownloading = true;
+            
+            // Generate the Word document
+            var documentBytes = WordDocumentService.GenerateAnetavleDocument(Proband, Individuals);
+            
+            // Format file name: Anetavle-[ProbandName]-[Date].docx
+            var sanitizedName = new string(
+                Proband.FullName.Select(c => char.IsLetterOrDigit(c) || c == ' ' ? c : '_').ToArray()
+            ).Replace(" ", "-");
+            var fileName = $"Anetavle-{sanitizedName}-{DateTime.Now:yyyy-MM-dd}.docx";
+            
+            // Trigger the download
+            await FileDownloadService.DownloadFileAsync(fileName, documentBytes);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error generating Word document: {ex.Message}");
+            // In a real application, you might want to show an error message to the user
+        }
+        finally
+        {
+            isDownloading = false;
+        }
     }
 }
 
@@ -65,6 +121,13 @@ else
     gap: 1rem;
     padding: 1rem;
     align-items: center;
+}
+
+.anetavle-actions {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    padding: 0 1rem;
 }
 
 .generation {

@@ -12,5 +12,29 @@
     <div id="app">Loading...</div>
 
     <script src="_framework/blazor.webassembly.js"></script>
+    <script>
+        // Function to download a file from a base64 string
+        window.downloadFileFromBase64 = function (fileName, base64String) {
+            // Determine MIME type for Word documents or other file types
+            const mimeType = fileName.endsWith('.docx')
+                ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                : 'application/octet-stream';
+                
+            // Create a link element
+            const link = document.createElement('a');
+            // Set the href attribute to a data URI with the base64 content
+            link.href = `data:${mimeType};base64,${base64String}`;
+            // Set the download attribute with the file name
+            link.download = fileName;
+            // Hide the link
+            link.style.display = 'none';
+            // Add the link to the document
+            document.body.appendChild(link);
+            // Click the link programmatically to start the download
+            link.click();
+            // Remove the link from the document
+            document.body.removeChild(link);
+        }
+    </script>
 </body>
 </html>
