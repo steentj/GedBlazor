@@ -11,18 +11,18 @@
                 <div class="details">
                     @if (Individual.BirthDate != null)
                     {
-                        <div class="date">*@Individual.BirthDate</div>
+                        <div class="date">* @Individual.BirthDate.ToString()</div>
                         @if (!string.IsNullOrEmpty(Individual.BirthPlace))
                         {
-                            <div class="place">@Individual.BirthPlace</div>
+                            <div class="place">@Individual.BirthPlace.ToString()</div>
                         }
                     }
                     @if (Individual.DeathDate != null)
                     {
-                        <div class="date">†@Individual.DeathDate</div>
+                        <div class="date">† @Individual.DeathDate.ToString()</div>
                         @if (!string.IsNullOrEmpty(Individual.DeathPlace))
                         {
-                            <div class="place">@Individual.DeathPlace</div>
+                            <div class="place">@Individual.DeathPlace.ToString()</div>
                         }
                     }
                 </div>
@@ -35,11 +35,11 @@
                     @AnenNumber @Individual.FullName
                     @if (Individual.BirthDate != null)
                     {
-                        <text> *@Individual.BirthDate</text>
+                        <text> * @Individual.BirthDate.ToString()</text>
                     }
                     @if (Individual.DeathDate != null)
                     {
-                        <text> †@Individual.DeathDate</text>
+                        <text> † @Individual.DeathDate.ToString()</text>
                     }
                 </div>
             </div>
@@ -93,6 +93,7 @@
     align-items: center;
     justify-content: center;
     height: 100%;
+    max-height: fit-content;
     writing-mode: sideways-lr;
 }
 

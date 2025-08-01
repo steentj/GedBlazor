@@ -205,10 +205,10 @@ public class GedcomParserTests
         Assert.Multiple(() =>
         {
             Assert.That(ind.BirthDate, Is.Not.Null);
-            Assert.That(ind.BirthDate.ToString(), Is.EqualTo("1 JAN 1950").IgnoreCase);
+            Assert.That(ind.BirthDate.ToString(), Is.EqualTo("01-01-1950"));
             Assert.That(ind.BirthPlace, Is.EqualTo("Copenhagen, Denmark"));
             Assert.That(ind.DeathDate, Is.Not.Null);
-            Assert.That(ind.DeathDate.ToString(), Is.EqualTo("2 FEB 2000").IgnoreCase);
+            Assert.That(ind.DeathDate.ToString(), Is.EqualTo("02-02-2000"));
             Assert.That(ind.DeathPlace, Is.EqualTo("Aarhus, Denmark"));
         });
     }
@@ -233,10 +233,10 @@ public class GedcomParserTests
         Assert.Multiple(() =>
         {
             Assert.That(ind.BirthDate, Is.Not.Null);
-            Assert.That(ind.BirthDate.ToString(), Is.EqualTo("1 JAN 1900").IgnoreCase);
+            Assert.That(ind.BirthDate.ToString(), Is.EqualTo("01-01-1900"));
             Assert.That(ind.BirthPlace, Is.EqualTo("TestBirthPlace"));
             Assert.That(ind.DeathDate, Is.Not.Null);
-            Assert.That(ind.DeathDate.ToString(), Is.EqualTo("2 FEB 2000").IgnoreCase);
+            Assert.That(ind.DeathDate.ToString(), Is.EqualTo("02-02-2000"));
             Assert.That(ind.DeathPlace, Is.EqualTo("TestDeathPlace"));
         });
     }

@@ -54,7 +54,7 @@ public class GedcomDateTests
         var result = gedcomDate.ToString();
 
         // Assert
-        Assert.That(result, Is.EqualTo("12 May 1984"));
+        Assert.That(result, Is.EqualTo("12-05-1984"));
     }
 
     [Test]
@@ -67,6 +67,19 @@ public class GedcomDateTests
         var result = gedcomDate.ToString();
 
         // Assert
-        Assert.That(result, Is.EqualTo("Abt 1984"));
+        Assert.That(result, Is.EqualTo("Ca 1984"));
+    }
+    
+    [Test]
+    public void ToString_Formats_Date_And_Month_With_2_Digits()
+    {
+        // Arrange
+        var gedcomDate = new GedcomDate(1, 1, 2023);
+
+        // Act
+        var result = gedcomDate.ToString();
+
+        // Assert
+        Assert.That(result, Is.EqualTo("01-01-2023"));
     }
 }

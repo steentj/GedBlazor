@@ -64,10 +64,11 @@ public readonly record struct GedcomDate
     public override string ToString()
     {
         if (IsApproximate)
-            return $"Abt {Year}";
+            return $"Ca {Year}";
 
+        // Always format as dd-MM-yyyy (e.g., 01-01-1900)
         if (Day.HasValue && Month.HasValue)
-            return $"{Day.Value} {CultureInfo.InvariantCulture.DateTimeFormat.GetAbbreviatedMonthName(Month.Value)} {Year}";
+            return $"{Day.Value:D2}-{Month.Value:D2}-{Year}";
 
         return Year.ToString();
     }

@@ -75,6 +75,6 @@ public class IndividualTests
         var result = individual.ToString();
 
         // Assert
-        Assert.That(result, Is.EqualTo("John Smith (1 Jan 1980 - 31 Dec 2020)"));
+        Assert.That(result, Is.EqualTo("John Smith (01-01-1980 - 31-12-2020)"));
     }
 }

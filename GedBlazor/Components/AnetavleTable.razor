@@ -24,6 +24,19 @@ else
     </div>
 
     <div class="anetavle" aria-label="Anetavle">
+        <div class="generation proband" aria-label="Proband">
+            <AnetavleCell Individual="@Proband" AnenNumber="1" />
+        </div>
+        <div class="generation parents" aria-label="Forældre-generation">
+            <AnetavleCell Individual="@GetAncestor(2)" AnenNumber="2" />
+            <AnetavleCell Individual="@GetAncestor(3)" AnenNumber="3" />
+        </div>
+        <div class="generation grandparents" aria-label="Bedsteforældre-generation">
+            <AnetavleCell Individual="@GetAncestor(4)" AnenNumber="4" />
+            <AnetavleCell Individual="@GetAncestor(5)" AnenNumber="5" />
+            <AnetavleCell Individual="@GetAncestor(6)" AnenNumber="6" />
+            <AnetavleCell Individual="@GetAncestor(7)" AnenNumber="7" />
+        </div>
         <div class="generation great-grandparents" aria-label="Oldeforældre-generation">
             <AnetavleCell Individual="@GetAncestor(8)" AnenNumber="8" ShowMinimal="true" />
             <AnetavleCell Individual="@GetAncestor(9)" AnenNumber="9" ShowMinimal="true" />
@@ -34,18 +47,23 @@ else
             <AnetavleCell Individual="@GetAncestor(14)" AnenNumber="14" ShowMinimal="true" />
             <AnetavleCell Individual="@GetAncestor(15)" AnenNumber="15" ShowMinimal="true" />
         </div>
-        <div class="generation grandparents" aria-label="Bedsteforældre-generation">
-            <AnetavleCell Individual="@GetAncestor(4)" AnenNumber="4" ShowMinimal="true" />
-            <AnetavleCell Individual="@GetAncestor(5)" AnenNumber="5" ShowMinimal="true" />
-            <AnetavleCell Individual="@GetAncestor(6)" AnenNumber="6" ShowMinimal="true" />
-            <AnetavleCell Individual="@GetAncestor(7)" AnenNumber="7" ShowMinimal="true" />
-        </div>
-        <div class="generation parents" aria-label="Forældre-generation">
-            <AnetavleCell Individual="@GetAncestor(2)" AnenNumber="2" />
-            <AnetavleCell Individual="@GetAncestor(3)" AnenNumber="3" />
-        </div>
-        <div class="generation proband" aria-label="Proband">
-            <AnetavleCell Individual="@Proband" AnenNumber="1" />
+        <div class="generation great-great-grandparents" aria-label="Tipoldeforældre-generation">
+            <AnetavleCell Individual="@GetAncestor(16)" AnenNumber="16" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(17)" AnenNumber="17" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(18)" AnenNumber="18" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(19)" AnenNumber="19" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(20)" AnenNumber="20" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(21)" AnenNumber="21" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(22)" AnenNumber="22" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(23)" AnenNumber="23" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(24)" AnenNumber="24" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(25)" AnenNumber="25" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(26)" AnenNumber="26" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(27)" AnenNumber="27" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(28)" AnenNumber="28" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(29)" AnenNumber="29" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(30)" AnenNumber="30" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(31)" AnenNumber="31" ShowMinimal="true" />
         </div>
     </div>
 }
@@ -140,6 +158,12 @@ else
 .great-grandparents {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
+    gap: 0.5rem;
+}
+
+.great-great-grandparents {
+    display: grid;
+    grid-template-columns: repeat(16, 1fr);
     gap: 0.5rem;
 }
 

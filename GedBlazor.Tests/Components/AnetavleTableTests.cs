@@ -66,7 +66,7 @@ public class AnetavleTableTests
 
         // Assert
         Assert.That(cut.Find(".anetavle"), Is.Not.Null);
-        Assert.That(cut.FindAll(".generation").Count, Is.EqualTo(4));
+        Assert.That(cut.FindAll(".generation").Count, Is.EqualTo(5));
     }
 
     [Test]
