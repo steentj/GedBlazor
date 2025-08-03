@@ -2,7 +2,6 @@ using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using GedBlazor.Models;
-using System.IO;
 
 namespace GedBlazor.Services;
 
@@ -20,39 +19,42 @@ public class WordDocumentService : IWordDocumentService
     public byte[] GenerateAnetavleDocument(Individual proband, Dictionary<string, Individual> individuals)
     {
         using var memoryStream = new MemoryStream();
-        using var wordDocument = WordprocessingDocument.Create(
+        using (var wordDocument = WordprocessingDocument.Create(
             memoryStream, 
-            WordprocessingDocumentType.Document);
+            WordprocessingDocumentType.Document))
+        {
+            // Add a main document part
+            var mainPart = wordDocument.AddMainDocumentPart();
+            mainPart.Document = new Document();
+            var body = mainPart.Document.AppendChild(new Body());
             
-        // Add a main document part
-        var mainPart = wordDocument.AddMainDocumentPart();
-        mainPart.Document = new Document();
-        var body = mainPart.Document.AppendChild(new Body());
-        
-        // Create styles
-        AddStyles(wordDocument);
-        
-        // Add title
-        var title = body.AppendChild(
-            new Paragraph(
-                new ParagraphProperties(
-                    new ParagraphStyleId() { Val = "Title" }),
-                new Run(
-                    new Text($"Anetavle for {proband.FullName}")
+            // Create styles
+            AddStyles(wordDocument);
+            
+            // Add title
+            body.AppendChild(
+                new Paragraph(
+                    new ParagraphProperties(
+                        new ParagraphStyleId() { Val = "Title" }),
+                    new Run(
+                        new Text($"Anetavle for {proband.FullName}")
+                    )
                 )
-            )
-        );
+            );
 
-        // Create a table with 16 rows and 8 columns
-        var table = CreateAnetavleTable(proband, individuals);
-        body.AppendChild(table);
-        
-        // Add page orientation to be Portrait
-        AddPageOrientation(wordDocument, true);
-        
-        // Save the document
-        mainPart.Document.Save();
-        wordDocument.Dispose();
+            // Create a table with 16 rows and 8 columns
+            var table = CreateAnetavleTable(proband, individuals);
+            body.AppendChild(table);
+            
+            // Add page orientation to be Portrait
+            AddPageOrientation(wordDocument, true);
+            
+            // Save the document
+            mainPart.Document.Save();
+        } // wordDocument is properly closed here when the using block ends
+
+        // Reset stream position to beginning before reading
+        memoryStream.Position = 0;
         
         return memoryStream.ToArray();
     }
@@ -63,56 +65,88 @@ public class WordDocumentService : IWordDocumentService
     private Table CreateAnetavleTable(Individual proband, Dictionary<string, Individual> individuals)
     {
         var table = new Table();
-        
-        // Define table properties
+        // var table = new Table();
+        // Define table properties with clear borders and width
         var tableProperties = new TableProperties(
-            new TableWidth() { Width = "5000", Type = TableWidthUnitValues.Pct },
-            new TableLayout() { Type = TableLayoutValues.Fixed },
-            new TableLook() { Val = "0000", FirstRow = false, LastRow = false, FirstColumn = false, LastColumn = false, NoHorizontalBand = false, NoVerticalBand = true });
-            
+            // new TableWidth() { Width = "8000", Type = TableWidthUnitValues.Auto },
+            new TableBorders(
+                new TopBorder() { Val = BorderValues.Single, Size = 6 },
+                new BottomBorder() { Val = BorderValues.Single, Size = 6 },
+                new LeftBorder() { Val = BorderValues.Single, Size = 6 },
+                new RightBorder() { Val = BorderValues.Single, Size = 6 },
+                new InsideHorizontalBorder() { Val = BorderValues.Single, Size = 6 },
+                new InsideVerticalBorder() { Val = BorderValues.Single, Size = 6 }
+            ),
+            new TableLayout() { Type = TableLayoutValues.Autofit },
+            new TableLook() { Val = "04A0", FirstRow = true, LastRow = false, FirstColumn = true, LastColumn = false, NoHorizontalBand = false, NoVerticalBand = true }
+        );
         table.AppendChild(tableProperties);
         
         // Create rows and cells for great-grandparents (8 cells)
-        var ggRow = new TableRow();
+        var ggRow = new TableRow
+        {
+            TableRowProperties = new TableRowProperties(
+                new TableRowHeight() { Val = 2000, HeightType = HeightRuleValues.AtLeast }
+            )
+        };
+
         for (int i = 8; i <= 15; i++)
         {
             var cell = CreateAnetavleCell(GetAncestor(i, individuals), i, true);
-            ggRow.AppendChild(cell);
+            ggRow.Append(cell);
         }
-        table.AppendChild(ggRow);
+        table.Append(ggRow);
         
         // Create rows and cells for grandparents (4 cells)
-        var gRow = new TableRow();
+        var gRow = new TableRow
+        {
+            TableRowProperties = new TableRowProperties(
+                new TableRowHeight() { Val = 288, HeightType = HeightRuleValues.AtLeast }
+            )
+        };
+        
         for (int i = 4; i <= 7; i++)
         {
-            var cell = CreateAnetavleCell(GetAncestor(i, individuals), i, true);
+            var cell = CreateAnetavleCell(GetAncestor(i, individuals), i, false);
             // Set the cell to span 2 columns
-            var cellProperties = new TableCellProperties(new GridSpan() { Val = 2 });
-            cell.InsertAt(cellProperties, 0);
-            gRow.AppendChild(cell);
+            // var cellProperties = new TableCellProperties(new GridSpan() { Val = 2 });
+            // cell.InsertAt(cellProperties, 0);
+            gRow.Append(cell);
         }
-        table.AppendChild(gRow);
+        table.Append(gRow);
         
         // Create row and cells for parents (2 cells)
-        var pRow = new TableRow();
+        var pRow = new TableRow
+        {
+            TableRowProperties = new TableRowProperties(
+                new TableRowHeight() { Val = 288, HeightType = HeightRuleValues.AtLeast }
+            )
+        };
+        
         for (int i = 2; i <= 3; i++)
         {
             var cell = CreateAnetavleCell(GetAncestor(i, individuals), i, false);
             // Set the cell to span 4 columns
-            var cellProperties = new TableCellProperties(new GridSpan() { Val = 4 });
-            cell.InsertAt(cellProperties, 0);
-            pRow.AppendChild(cell);
+            // var cellProperties = new TableCellProperties(new GridSpan() { Val = 4 });
+            // cell.InsertAt(cellProperties, 0);
+            pRow.Append(cell);
         }
-        table.AppendChild(pRow);
+        table.Append(pRow);
         
         // Create row and cell for proband (1 cell)
-        var pbRow = new TableRow();
+        var pbRow = new TableRow
+        {
+            TableRowProperties = new TableRowProperties(
+                new TableRowHeight() { Val = 288, HeightType = HeightRuleValues.AtLeast }
+            )
+        };
+        
         var probandCell = CreateAnetavleCell(proband, 1, false);
         // Set the cell to span 8 columns
-        var probandCellProperties = new TableCellProperties(new GridSpan() { Val = 8 });
-        probandCell.InsertAt(probandCellProperties, 0);
-        pbRow.AppendChild(probandCell);
-        table.AppendChild(pbRow);
+        // var probandCellProperties = new TableCellProperties(new GridSpan() { Val = 8 });
+        // probandCell.InsertAt(probandCellProperties, 0);
+        pbRow.Append(probandCell);
+        table.Append(pbRow);
         
         return table;
     }
@@ -133,8 +167,31 @@ public class WordDocumentService : IWordDocumentService
                 new LeftBorder() { Val = BorderValues.Single, Size = 4 },
                 new RightBorder() { Val = BorderValues.Single, Size = 4 }
             ),
-            new Shading() { Val = ShadingPatternValues.Clear, Color = "auto", Fill = GetCellBackgroundColor(anenummer) }
+            new Shading() { Val = ShadingPatternValues.Clear, Color = "auto", Fill = GetCellBackgroundColor(anenummer) },
+            new TableCellVerticalAlignment() { Val = TableVerticalAlignmentValues.Center }
         );
+
+        if (minimal)
+        {
+            cellProperties.AppendChild(
+                new TextDirection() { Val = TextDirectionValues.BottomToTopLeftToRight });
+        }
+        
+        if (anenummer == 1)
+        {
+            cellProperties.AppendChild(new GridSpan() { Val = 8 });
+            cellProperties.AppendChild(new Justification() { Val = JustificationValues.Center });
+        }
+        else if (anenummer <= 3)
+        {
+            cellProperties.AppendChild(new GridSpan() { Val = 4 });
+            cellProperties.AppendChild(new Justification() { Val = JustificationValues.Center });
+        }
+        else if (anenummer <= 7)
+        {
+            cellProperties.AppendChild(new GridSpan() { Val = 2 });
+            cellProperties.AppendChild(new Justification() { Val = JustificationValues.Center });
+        }
         
         cell.AppendChild(cellProperties);
         
@@ -143,7 +200,8 @@ public class WordDocumentService : IWordDocumentService
             // Add Anenummer
             var anenummerPara = new Paragraph(
                 new ParagraphProperties(
-                    new ParagraphStyleId() { Val = "AnenummerStyle" }
+                    new ParagraphStyleId() { Val = "AnenummerStyle" },
+                    new Justification() { Val = JustificationValues.Center }
                 ),
                 new Run(new Text($"#{anenummer}"))
             );
@@ -152,7 +210,8 @@ public class WordDocumentService : IWordDocumentService
             // Add name
             var namePara = new Paragraph(
                 new ParagraphProperties(
-                    new ParagraphStyleId() { Val = "NameStyle" }
+                    new ParagraphStyleId() { Val = "NameStyle" },
+                    new Justification() { Val = JustificationValues.Center }
                 ),
                 new Run(new Text(individual.FullName))
             );
@@ -163,18 +222,20 @@ public class WordDocumentService : IWordDocumentService
             {
                 var birthDatePara = new Paragraph(
                     new ParagraphProperties(
-                        new ParagraphStyleId() { Val = "DateStyle" }
+                        new ParagraphStyleId() { Val = "DateStyle" },
+                        new Justification() { Val = JustificationValues.Center }
                     ),
                     new Run(new Text($"*{individual.BirthDate}"))
                 );
                 cell.AppendChild(birthDatePara);
                 
-                // Add birth place if not minimal and place exists
+                // Add birthplace if not minimal and place exist
                 if (!minimal && !string.IsNullOrEmpty(individual.BirthPlace))
                 {
                     var birthPlacePara = new Paragraph(
                         new ParagraphProperties(
-                            new ParagraphStyleId() { Val = "PlaceStyle" }
+                            new ParagraphStyleId() { Val = "PlaceStyle" },
+                            new Justification() { Val = JustificationValues.Center }
                         ),
                         new Run(new Text(individual.BirthPlace))
                     );
@@ -187,18 +248,20 @@ public class WordDocumentService : IWordDocumentService
             {
                 var deathDatePara = new Paragraph(
                     new ParagraphProperties(
-                        new ParagraphStyleId() { Val = "DateStyle" }
+                        new ParagraphStyleId() { Val = "DateStyle" },
+                        new Justification() { Val = JustificationValues.Center }
                     ),
                     new Run(new Text($"†{individual.DeathDate}"))
                 );
                 cell.AppendChild(deathDatePara);
                 
-                // Add death place if not minimal and place exists
+                // Add death place if not minimal and place exist
                 if (!minimal && !string.IsNullOrEmpty(individual.DeathPlace))
                 {
                     var deathPlacePara = new Paragraph(
                         new ParagraphProperties(
-                            new ParagraphStyleId() { Val = "PlaceStyle" }
+                            new ParagraphStyleId() { Val = "PlaceStyle" },
+                            new Justification() { Val = JustificationValues.Center }
                         ),
                         new Run(new Text(individual.DeathPlace))
                     );
@@ -211,7 +274,8 @@ public class WordDocumentService : IWordDocumentService
             // Empty cell
             var emptyPara = new Paragraph(
                 new ParagraphProperties(
-                    new ParagraphStyleId() { Val = "EmptyStyle" }
+                    new ParagraphStyleId() { Val = "EmptyStyle" },
+                    new Justification() { Val = JustificationValues.Center }
                 ),
                 new Run(new Text($"No ancestor ({anenummer})"))
             );
@@ -226,7 +290,37 @@ public class WordDocumentService : IWordDocumentService
     /// </summary>
     private Individual? GetAncestor(int anenummer, Dictionary<string, Individual> individuals)
     {
-        return individuals.Values.FirstOrDefault(i => i.Anenummer == anenummer);
+        // Debug check - log or check if any individuals have Anenummer set
+        // Console.WriteLine($"Looking for anenummer {anenummer}, total individuals: {individuals.Count}");
+        
+        var ancestor = individuals.Values.FirstOrDefault(i => i.Anenummer == anenummer);
+        
+        // If not found by Anenummer, try to find by relationships
+        if (ancestor == null && anenummer > 1)
+        {
+            // For fathers (even numbers), look for father of anenummer/2
+            // For mothers (odd numbers), look for mother of (anenummer-1)/2
+            int childAnenummer = anenummer % 2 == 0 ? anenummer / 2 : (anenummer - 1) / 2;
+            
+            var child = individuals.Values.FirstOrDefault(i => i.Anenummer == childAnenummer);
+            if (child != null)
+            {
+                if (anenummer % 2 == 0 && !string.IsNullOrEmpty(child.FatherId))
+                {
+                    // Even anenummer = father
+                    individuals.TryGetValue(child.FatherId, out ancestor);
+                    if (ancestor != null) ancestor.Anenummer = anenummer;
+                }
+                else if (anenummer % 2 == 1 && !string.IsNullOrEmpty(child.MotherId))
+                {
+                    // Odd anenummer = mother
+                    individuals.TryGetValue(child.MotherId, out ancestor);
+                    if (ancestor != null) ancestor.Anenummer = anenummer;
+                }
+            }
+        }
+        
+        return ancestor;
     }
     
     /// <summary>
@@ -262,10 +356,7 @@ public class WordDocumentService : IWordDocumentService
         }
         
         // Ensure Styles is not null
-        if (stylesPart.Styles == null)
-        {
-            stylesPart.Styles = new Styles();
-        }
+        stylesPart.Styles ??= new Styles();
         
         // Create Title style
         var titleStyle = new Style
@@ -416,9 +507,6 @@ public class WordDocumentService : IWordDocumentService
         sectionProperties.AppendChild(pageMargin);
         
         // Check if MainDocumentPart and Document and Body exist before appending
-        if (document.MainDocumentPart?.Document?.Body != null)
-        {
-            document.MainDocumentPart.Document.Body.AppendChild(sectionProperties);
-        }
+        document.MainDocumentPart?.Document.Body?.AppendChild(sectionProperties);
     }
 }
