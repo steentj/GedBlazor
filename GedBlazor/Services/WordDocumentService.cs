@@ -10,6 +10,8 @@ namespace GedBlazor.Services;
 /// </summary>
 public class WordDocumentService : IWordDocumentService
 {
+    const int AntalGenerationer = 5;
+    const int SideBredde = 12240; // A4 width in twentieths of a point
     /// <summary>
     /// Generates a Word document (.docx) containing the Anetavle (ancestor table)
     /// </summary>
@@ -26,6 +28,9 @@ public class WordDocumentService : IWordDocumentService
             // Add a main document part
             var mainPart = wordDocument.AddMainDocumentPart();
             mainPart.Document = new Document();
+            
+            mainPart.Document.AddNamespaceDeclaration("w", 
+                "http://schemas.openxmlformats.org/wordprocessingml/2006/main");
             var body = mainPart.Document.AppendChild(new Body());
             
             // Create styles
@@ -68,7 +73,8 @@ public class WordDocumentService : IWordDocumentService
         // var table = new Table();
         // Define table properties with clear borders and width
         var tableProperties = new TableProperties(
-            // new TableWidth() { Width = "8000", Type = TableWidthUnitValues.Auto },
+            new TableLayout() { Type = TableLayoutValues.Fixed },
+            new TableWidth() { Width = (SideBredde - (2 * 720)).ToString(), Type = TableWidthUnitValues.Dxa },
             new TableBorders(
                 new TopBorder() { Val = BorderValues.Single, Size = 6 },
                 new BottomBorder() { Val = BorderValues.Single, Size = 6 },
@@ -77,16 +83,39 @@ public class WordDocumentService : IWordDocumentService
                 new InsideHorizontalBorder() { Val = BorderValues.Single, Size = 6 },
                 new InsideVerticalBorder() { Val = BorderValues.Single, Size = 6 }
             ),
-            new TableLayout() { Type = TableLayoutValues.Autofit },
             new TableLook() { Val = "04A0", FirstRow = true, LastRow = false, FirstColumn = true, LastColumn = false, NoHorizontalBand = false, NoVerticalBand = true }
         );
         table.AppendChild(tableProperties);
+    
+        // Define grid columns - create 16 equal columns
+        var tableGrid = new TableGrid();
+        int columnWidth = (SideBredde - (2 * 720)) / 16;
+        for (int i = 0; i < 16; i++)
+        {
+            tableGrid.AppendChild(new GridColumn() { Width = columnWidth.ToString() });
+        }
+        table.AppendChild(tableGrid);
+        
+        // Create rows and cells for great-grandparents (16 cells)
+        var gggRow = new TableRow
+        {
+            TableRowProperties = new TableRowProperties(
+                new TableRowHeight() { Val = 3000, HeightType = HeightRuleValues.AtLeast }
+            )
+        };
+
+        for (int i = 16; i <= 31; i++)
+        {
+            var cell = CreateAnetavleCell(GetAncestor(i, individuals), i, true);
+            gggRow.Append(cell);
+        }
+        table.Append(gggRow);
         
         // Create rows and cells for great-grandparents (8 cells)
         var ggRow = new TableRow
         {
             TableRowProperties = new TableRowProperties(
-                new TableRowHeight() { Val = 2000, HeightType = HeightRuleValues.AtLeast }
+                new TableRowHeight() { Val = 3000, HeightType = HeightRuleValues.AtLeast }
             )
         };
 
@@ -108,9 +137,6 @@ public class WordDocumentService : IWordDocumentService
         for (int i = 4; i <= 7; i++)
         {
             var cell = CreateAnetavleCell(GetAncestor(i, individuals), i, false);
-            // Set the cell to span 2 columns
-            // var cellProperties = new TableCellProperties(new GridSpan() { Val = 2 });
-            // cell.InsertAt(cellProperties, 0);
             gRow.Append(cell);
         }
         table.Append(gRow);
@@ -126,9 +152,6 @@ public class WordDocumentService : IWordDocumentService
         for (int i = 2; i <= 3; i++)
         {
             var cell = CreateAnetavleCell(GetAncestor(i, individuals), i, false);
-            // Set the cell to span 4 columns
-            // var cellProperties = new TableCellProperties(new GridSpan() { Val = 4 });
-            // cell.InsertAt(cellProperties, 0);
             pRow.Append(cell);
         }
         table.Append(pRow);
@@ -142,9 +165,6 @@ public class WordDocumentService : IWordDocumentService
         };
         
         var probandCell = CreateAnetavleCell(proband, 1, false);
-        // Set the cell to span 8 columns
-        // var probandCellProperties = new TableCellProperties(new GridSpan() { Val = 8 });
-        // probandCell.InsertAt(probandCellProperties, 0);
         pbRow.Append(probandCell);
         table.Append(pbRow);
         
@@ -157,40 +177,40 @@ public class WordDocumentService : IWordDocumentService
     private TableCell CreateAnetavleCell(Individual? individual, int anenummer, bool minimal)
     {
         var cell = new TableCell();
-        
+    
         // Add cell properties
         var cellProperties = new TableCellProperties(
-            new TableCellWidth() { Type = TableWidthUnitValues.Auto },
-            new TableCellBorders(
-                new TopBorder() { Val = BorderValues.Single, Size = 4 },
-                new BottomBorder() { Val = BorderValues.Single, Size = 4 },
-                new LeftBorder() { Val = BorderValues.Single, Size = 4 },
-                new RightBorder() { Val = BorderValues.Single, Size = 4 }
-            ),
-            new Shading() { Val = ShadingPatternValues.Clear, Color = "auto", Fill = GetCellBackgroundColor(anenummer) },
-            new TableCellVerticalAlignment() { Val = TableVerticalAlignmentValues.Center }
+            new TableCellVerticalAlignment() { Val = TableVerticalAlignmentValues.Center },
+            new Shading() { Val = ShadingPatternValues.Clear, Color = "auto", Fill = GetCellBackgroundColor(anenummer) }
         );
 
+        switch (anenummer)
+        {
+            // Set the GridSpan based on anenummer (only set it once)
+            case 1:
+                // Proband spans all 16 columns
+                cellProperties.AppendChild(new GridSpan() { Val = 16 });
+                break;
+            case <= 3:
+                // Parents span 8 columns each
+                cellProperties.AppendChild(new GridSpan() { Val = 8 });
+                break;
+            case <= 7:
+                // Grandparents span 4 columns each
+                cellProperties.AppendChild(new GridSpan() { Val = 4 });
+                break;
+            case <= 15:
+                // Great-grandparents span 2 columns each
+                cellProperties.AppendChild(new GridSpan() { Val = 2 });
+                break;
+        }
+    
+        cellProperties.AppendChild(new Justification() { Val = JustificationValues.Center });
+        
         if (minimal)
         {
             cellProperties.AppendChild(
                 new TextDirection() { Val = TextDirectionValues.BottomToTopLeftToRight });
-        }
-        
-        if (anenummer == 1)
-        {
-            cellProperties.AppendChild(new GridSpan() { Val = 8 });
-            cellProperties.AppendChild(new Justification() { Val = JustificationValues.Center });
-        }
-        else if (anenummer <= 3)
-        {
-            cellProperties.AppendChild(new GridSpan() { Val = 4 });
-            cellProperties.AppendChild(new Justification() { Val = JustificationValues.Center });
-        }
-        else if (anenummer <= 7)
-        {
-            cellProperties.AppendChild(new GridSpan() { Val = 2 });
-            cellProperties.AppendChild(new Justification() { Val = JustificationValues.Center });
         }
         
         cell.AppendChild(cellProperties);
@@ -277,7 +297,7 @@ public class WordDocumentService : IWordDocumentService
                     new ParagraphStyleId() { Val = "EmptyStyle" },
                     new Justification() { Val = JustificationValues.Center }
                 ),
-                new Run(new Text($"No ancestor ({anenummer})"))
+                new Run(new Text($"Ingen ane ({anenummer})"))
             );
             cell.AppendChild(emptyPara);
         }
@@ -482,7 +502,7 @@ public class WordDocumentService : IWordDocumentService
         
         if (isPortrait)
         {
-            pageSize.Width = 12240; // A4 width in twentieths of a point
+            pageSize.Width = SideBredde; // A4 width in twentieths of a point
             pageSize.Height = 15840; // A4 height in twentieths of a point
         }
         else
