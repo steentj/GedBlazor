@@ -100,7 +100,7 @@ public class WordDocumentService : IWordDocumentService
         var gggRow = new TableRow
         {
             TableRowProperties = new TableRowProperties(
-                new TableRowHeight() { Val = 3000, HeightType = HeightRuleValues.AtLeast }
+                new TableRowHeight() { Val = 3500, HeightType = HeightRuleValues.AtLeast }
             )
         };
 
@@ -115,7 +115,7 @@ public class WordDocumentService : IWordDocumentService
         var ggRow = new TableRow
         {
             TableRowProperties = new TableRowProperties(
-                new TableRowHeight() { Val = 3000, HeightType = HeightRuleValues.AtLeast }
+                new TableRowHeight() { Val = 3500, HeightType = HeightRuleValues.AtLeast }
             )
         };
 
@@ -183,7 +183,7 @@ public class WordDocumentService : IWordDocumentService
             new TableCellVerticalAlignment() { Val = TableVerticalAlignmentValues.Center },
             new Shading() { Val = ShadingPatternValues.Clear, Color = "auto", Fill = GetCellBackgroundColor(anenummer) }
         );
-
+        
         switch (anenummer)
         {
             // Set the GridSpan based on anenummer (only set it once)
@@ -217,23 +217,23 @@ public class WordDocumentService : IWordDocumentService
         
         if (individual != null)
         {
-            // Add Anenummer
-            var anenummerPara = new Paragraph(
-                new ParagraphProperties(
-                    new ParagraphStyleId() { Val = "AnenummerStyle" },
-                    new Justification() { Val = JustificationValues.Center }
-                ),
-                new Run(new Text($"#{anenummer}"))
-            );
-            cell.AppendChild(anenummerPara);
+            // // Add Anenummer
+            // var anenummerPara = new Paragraph(
+            //     new ParagraphProperties(
+            //         new ParagraphStyleId() { Val = "AnenummerStyle" },
+            //         new Justification() { Val = JustificationValues.Center }
+            //     ),
+            //     new Run(new Text($"#{anenummer}"))
+            // );
+            // cell.AppendChild(anenummerPara);
             
             // Add name
             var namePara = new Paragraph(
                 new ParagraphProperties(
-                    new ParagraphStyleId() { Val = "NameStyle" },
+                    new ParagraphStyleId() { Val = minimal ? "MinimalNameStyle" : "NameStyle" },
                     new Justification() { Val = JustificationValues.Center }
                 ),
-                new Run(new Text(individual.FullName))
+                new Run(new Text($"#{anenummer} {individual.FullName}"))
             );
             cell.AppendChild(namePara);
             
@@ -410,12 +410,12 @@ public class WordDocumentService : IWordDocumentService
             new SpacingBetweenLines { After = "60", Before = "60", Line = "240", LineRule = LineSpacingRuleValues.Auto }
         ));
         anenummerStyle.AppendChild(new RunProperties(
-            new FontSize { Val = "18" },
+            new FontSize { Val = "16" },
             new Color { Val = "666666" }
         ));
         stylesPart.Styles.AppendChild(anenummerStyle);
         
-        // Create Name style
+        // Create Name styles
         var nameStyle = new Style
         {
             Type = StyleValues.Paragraph,
@@ -429,9 +429,27 @@ public class WordDocumentService : IWordDocumentService
         ));
         nameStyle.AppendChild(new RunProperties(
             new Bold(),
-            new FontSize { Val = "22" }
+            new FontSize { Val = "20" }
         ));
         stylesPart.Styles.AppendChild(nameStyle);
+        
+        // Create Name style for minimal cells
+        var minimalNameStyle = new Style
+        {
+            Type = StyleValues.Paragraph,
+            StyleId = "MinimalNameStyle",
+            CustomStyle = true
+        };
+        minimalNameStyle.AppendChild(new StyleName { Val = "MinimalNameStyle" });
+        minimalNameStyle.AppendChild(new BasedOn { Val = "Normal" });
+        minimalNameStyle.AppendChild(new ParagraphProperties(
+            new SpacingBetweenLines { After = "60", Before = "60", Line = "240", LineRule = LineSpacingRuleValues.Auto }
+        ));
+        minimalNameStyle.AppendChild(new RunProperties(
+            new FontSize { Val = "18" },
+            new Color { Val = "666666" }
+        ));
+        stylesPart.Styles.AppendChild(minimalNameStyle);    
         
         // Create Date style
         var dateStyle = new Style
