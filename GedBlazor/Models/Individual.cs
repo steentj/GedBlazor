@@ -16,6 +16,12 @@ public class Individual
     public string? FatherId { get; set; }
     public string? MotherId { get; set; }
     public int Anenummer { get; set; } = -1;
+    
+    public bool HasAncestors => FatherId != null || MotherId != null;
+    
+    public bool Expanded { get; set; } = false;
+    
+    public string? ChildLink { get; set; }
 
     public Individual(string id)
     {

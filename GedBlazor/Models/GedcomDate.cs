@@ -22,7 +22,7 @@ public readonly record struct GedcomDate
         if (string.IsNullOrWhiteSpace(gedcomDate))
             throw new ArgumentNullException(nameof(gedcomDate));
 
-        var parts = gedcomDate.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var parts = gedcomDate.Trim().Split([' ', '.', '-'], StringSplitOptions.RemoveEmptyEntries);
 
         // Handle approximate dates
         if (parts[0].Equals("ABT", StringComparison.OrdinalIgnoreCase))
@@ -42,8 +42,8 @@ public readonly record struct GedcomDate
             {
                 return new GedcomDate(day, monthDate.Month, year);
             }
-            // Try '01.01.1900' format
-            if (DateTime.TryParseExact(parts[0], "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var fullDate))
+            // Try '01.01.1900' format $"{parts[0]:00}.{parts[1]:00}.{parts[2]:00}"
+            if (DateTime.TryParseExact($"{parts[0].PadLeft(2, '0')}.{parts[1].PadLeft(2, '0')}.{parts[2]}", "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var fullDate))
             {
                 return new GedcomDate(fullDate.Day, fullDate.Month, fullDate.Year);
             }

@@ -1,6 +1,7 @@
 using GedBlazor.Models;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using DocumentFormat.OpenXml.Drawing.Diagrams;
 
 namespace GedBlazor.Parsers;
 
@@ -212,12 +213,18 @@ public partial class GedcomParser : IGedcomParser
         {
             var fatherId = family.Husband?.Id;
             var motherId = family.Wife?.Id;
+            
             foreach (var child in family.Children)
             {
                 if (!string.IsNullOrEmpty(fatherId))
+                {
                     child.FatherId = fatherId;
+                }
+
                 if (!string.IsNullOrEmpty(motherId))
+                {
                     child.MotherId = motherId;
+                }
             }
         }
     }
@@ -229,18 +236,19 @@ public partial class GedcomParser : IGedcomParser
             ind.Anenummer = -1;
         if (string.IsNullOrEmpty(probandId) || !individuals.ContainsKey(probandId))
             return;
-        AssignAnenummerRecursive(individuals, probandId, 1);
+        AssignAnenummerRecursive(individuals, probandId, null, 1);
     }
 
-    private void AssignAnenummerRecursive(Dictionary<string, Individual> individuals, string? id, int anenummer)
+    private void AssignAnenummerRecursive(Dictionary<string, Individual> individuals, string? id, string? childLink, int anenummer)
     {
         if (string.IsNullOrEmpty(id) || !individuals.TryGetValue(id, out var ind) || ind.Anenummer > 0)
             return;
         ind.Anenummer = anenummer;
+        ind.ChildLink = childLink;
         if (!string.IsNullOrEmpty(ind.FatherId))
-            AssignAnenummerRecursive(individuals, ind.FatherId, 2 * anenummer);
+            AssignAnenummerRecursive(individuals, ind.FatherId, ind.Id, 2 * anenummer);
         if (!string.IsNullOrEmpty(ind.MotherId))
-            AssignAnenummerRecursive(individuals, ind.MotherId, 2 * anenummer + 1);
+            AssignAnenummerRecursive(individuals, ind.MotherId, ind.Id, 2 * anenummer + 1);
     }
 
     [System.Text.RegularExpressions.GeneratedRegex(@"(?<given>[^/]+)/(?<surname>[^/]+)/")]
