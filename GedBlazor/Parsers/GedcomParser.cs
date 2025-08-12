@@ -1,5 +1,8 @@
+using System;
+using System.Collections.Generic;
 using GedBlazor.Models;
 using System.Diagnostics;
+using System.Linq;
 using System.Text.RegularExpressions;
 using DocumentFormat.OpenXml.Drawing.Diagrams;
 
@@ -236,19 +239,32 @@ public partial class GedcomParser : IGedcomParser
             ind.Anenummer = -1;
         if (string.IsNullOrEmpty(probandId) || !individuals.ContainsKey(probandId))
             return;
-        AssignAnenummerRecursive(individuals, probandId, null, 1);
+        AssignAnenummerRecursive(individuals, probandId, 1);
     }
 
-    private void AssignAnenummerRecursive(Dictionary<string, Individual> individuals, string? id, string? childLink, int anenummer)
+    private void AssignAnenummerRecursive(Dictionary<string, Individual> individuals, string? id, int anenummer)
     {
         if (string.IsNullOrEmpty(id) || !individuals.TryGetValue(id, out var ind) || ind.Anenummer > 0)
             return;
         ind.Anenummer = anenummer;
-        ind.ChildLink = childLink;
+        
         if (!string.IsNullOrEmpty(ind.FatherId))
-            AssignAnenummerRecursive(individuals, ind.FatherId, ind.Id, 2 * anenummer);
+        {
+            if (ind.Ancestors.All(a => a.Id != ind.FatherId))
+            {
+                ind.Ancestors.Add(individuals[ind.FatherId]);
+            }
+            AssignAnenummerRecursive(individuals, ind.FatherId, 2 * anenummer);
+        }
         if (!string.IsNullOrEmpty(ind.MotherId))
-            AssignAnenummerRecursive(individuals, ind.MotherId, ind.Id, 2 * anenummer + 1);
+        {
+            if (ind.Ancestors.All(a => a.Id != ind.MotherId))
+            {
+                ind.Ancestors.Add(individuals[ind.MotherId]);
+            }
+
+            AssignAnenummerRecursive(individuals, ind.MotherId, 2 * anenummer + 1);
+        }
     }
 
     [System.Text.RegularExpressions.GeneratedRegex(@"(?<given>[^/]+)/(?<surname>[^/]+)/")]

@@ -7,8 +7,7 @@
     <base href="/" />
     <link href="lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
     <link href="app.css" rel="stylesheet" /> 
-    <link href="_content/Syncfusion.Blazor.Themes/bootstrap5.css" rel="stylesheet" />
-    <script src="_content/Syncfusion.Blazor.Core/scripts/syncfusion-blazor.min.js" type="text/javascript"></script>
+    <link rel="stylesheet" href="_content/Radzen.Blazor/css/material-base.css">
 </head>
 <body>
     <div id="app">Loading...</div>
@@ -38,5 +37,6 @@
             document.body.removeChild(link);
         }
     </script>
+    <script src="_content/Radzen.Blazor/Radzen.Blazor.js?v=@(typeof(Radzen.Colors).Assembly.GetName().Version)"></script>
 </body>
 </html>

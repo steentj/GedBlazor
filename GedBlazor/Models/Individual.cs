@@ -1,3 +1,4 @@
+using System;
 using System.Globalization;
 
 namespace GedBlazor.Models;
@@ -17,11 +18,11 @@ public class Individual
     public string? MotherId { get; set; }
     public int Anenummer { get; set; } = -1;
     
+    public List<Individual> Ancestors { get; set; } = new();
+    
     public bool HasAncestors => FatherId != null || MotherId != null;
     
-    public bool Expanded { get; set; } = false;
     
-    public string? ChildLink { get; set; }
 
     public Individual(string id)
     {
