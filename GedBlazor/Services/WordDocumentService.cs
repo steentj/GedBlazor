@@ -50,7 +50,7 @@ public class WordDocumentService : IWordDocumentService
                 )
             );
 
-            // Create a table with 16 rows and 8 columns
+            // Create a table with dynamic generations relative to the proband's anenummer
             var table = CreateAnetavleTable(proband, individuals);
             body.AppendChild(table);
             
@@ -73,7 +73,6 @@ public class WordDocumentService : IWordDocumentService
     private Table CreateAnetavleTable(Individual proband, Dictionary<string, Individual> individuals)
     {
         var table = new Table();
-        // var table = new Table();
         // Define table properties with clear borders and width
         var tableProperties = new TableProperties(
             new TableLayout() { Type = TableLayoutValues.Fixed },
@@ -99,75 +98,81 @@ public class WordDocumentService : IWordDocumentService
         }
         table.AppendChild(tableGrid);
         
-        // Create rows and cells for great-grandparents (16 cells)
+        // Determine starting anenummer (use proband's if set, else 1)
+        int start = proband.Anenummer > 0 ? proband.Anenummer : 1;
+        
+        // Great-great-grandparents (generation 4) - 16 cells, gridSpan 1
         var gggRow = new TableRow
         {
             TableRowProperties = new TableRowProperties(
                 new TableRowHeight() { Val = 3500, HeightType = HeightRuleValues.AtLeast }
             )
         };
-
-        for (int i = 16; i <= 31; i++)
+        int gen4Start = start << 4; // start * 16
+        for (int offset = 0; offset < 16; offset++)
         {
-            var cell = CreateAnetavleCell(GetAncestor(i, individuals), i, true);
+            int ane = gen4Start + offset;
+            var cell = CreateAnetavleCell(GetAncestor(ane, individuals), ane, true, 1, start);
             gggRow.Append(cell);
         }
         table.Append(gggRow);
         
-        // Create rows and cells for great-grandparents (8 cells)
+        // Great-grandparents (generation 3) - 8 cells, gridSpan 2
         var ggRow = new TableRow
         {
             TableRowProperties = new TableRowProperties(
                 new TableRowHeight() { Val = 3500, HeightType = HeightRuleValues.AtLeast }
             )
         };
-
-        for (int i = 8; i <= 15; i++)
+        int gen3Start = start << 3; // start * 8
+        for (int offset = 0; offset < 8; offset++)
         {
-            var cell = CreateAnetavleCell(GetAncestor(i, individuals), i, true);
+            int ane = gen3Start + offset;
+            var cell = CreateAnetavleCell(GetAncestor(ane, individuals), ane, true, 2, start);
             ggRow.Append(cell);
         }
         table.Append(ggRow);
         
-        // Create rows and cells for grandparents (4 cells)
+        // Grandparents (generation 2) - 4 cells, gridSpan 4
         var gRow = new TableRow
         {
             TableRowProperties = new TableRowProperties(
                 new TableRowHeight() { Val = 288, HeightType = HeightRuleValues.AtLeast }
             )
         };
-        
-        for (int i = 4; i <= 7; i++)
+        int gen2Start = start << 2; // start * 4
+        for (int offset = 0; offset < 4; offset++)
         {
-            var cell = CreateAnetavleCell(GetAncestor(i, individuals), i, false);
+            int ane = gen2Start + offset;
+            var cell = CreateAnetavleCell(GetAncestor(ane, individuals), ane, false, 4, start);
             gRow.Append(cell);
         }
         table.Append(gRow);
         
-        // Create row and cells for parents (2 cells)
+        // Parents (generation 1) - 2 cells, gridSpan 8
         var pRow = new TableRow
         {
             TableRowProperties = new TableRowProperties(
                 new TableRowHeight() { Val = 288, HeightType = HeightRuleValues.AtLeast }
             )
         };
-        
-        for (int i = 2; i <= 3; i++)
+        int gen1Start = start << 1; // start * 2
+        for (int offset = 0; offset < 2; offset++)
         {
-            var cell = CreateAnetavleCell(GetAncestor(i, individuals), i, false);
+            int ane = gen1Start + offset;
+            var cell = CreateAnetavleCell(GetAncestor(ane, individuals), ane, false, 8, start);
             pRow.Append(cell);
         }
         table.Append(pRow);
         
-        // Create row and cell for proband (1 cell)
+        // Proband (generation 0) - 1 cell, gridSpan 16
         var pbRow = new TableRow
         {
             TableRowProperties = new TableRowProperties(
                 new TableRowHeight() { Val = 288, HeightType = HeightRuleValues.AtLeast }
             )
         };
-        
-        var probandCell = CreateAnetavleCell(proband, 1, false);
+        var probandCell = CreateAnetavleCell(proband, start, false, 16, start);
         pbRow.Append(probandCell);
         table.Append(pbRow);
         
@@ -177,35 +182,19 @@ public class WordDocumentService : IWordDocumentService
     /// <summary>
     /// Creates a single cell for the Anetavle table
     /// </summary>
-    private TableCell CreateAnetavleCell(Individual? individual, int anenummer, bool minimal)
+    private TableCell CreateAnetavleCell(Individual? individual, int anenummer, bool minimal, int gridSpan, int start)
     {
         var cell = new TableCell();
     
         // Add cell properties
         var cellProperties = new TableCellProperties(
             new TableCellVerticalAlignment() { Val = TableVerticalAlignmentValues.Center },
-            new Shading() { Val = ShadingPatternValues.Clear, Color = "auto", Fill = GetCellBackgroundColor(anenummer) }
+            new Shading() { Val = ShadingPatternValues.Clear, Color = "auto", Fill = GetCellBackgroundColor(anenummer, start) }
         );
         
-        switch (anenummer)
+        if (gridSpan > 1)
         {
-            // Set the GridSpan based on anenummer (only set it once)
-            case 1:
-                // Proband spans all 16 columns
-                cellProperties.AppendChild(new GridSpan() { Val = 16 });
-                break;
-            case <= 3:
-                // Parents span 8 columns each
-                cellProperties.AppendChild(new GridSpan() { Val = 8 });
-                break;
-            case <= 7:
-                // Grandparents span 4 columns each
-                cellProperties.AppendChild(new GridSpan() { Val = 4 });
-                break;
-            case <= 15:
-                // Great-grandparents span 2 columns each
-                cellProperties.AppendChild(new GridSpan() { Val = 2 });
-                break;
+            cellProperties.AppendChild(new GridSpan() { Val = gridSpan });
         }
     
         cellProperties.AppendChild(new Justification() { Val = JustificationValues.Center });
@@ -220,17 +209,7 @@ public class WordDocumentService : IWordDocumentService
         
         if (individual != null)
         {
-            // // Add Anenummer
-            // var anenummerPara = new Paragraph(
-            //     new ParagraphProperties(
-            //         new ParagraphStyleId() { Val = "AnenummerStyle" },
-            //         new Justification() { Val = JustificationValues.Center }
-            //     ),
-            //     new Run(new Text($"#{anenummer}"))
-            // );
-            // cell.AppendChild(anenummerPara);
-            
-            // Add name
+            // Add name with anenummer
             var namePara = new Paragraph(
                 new ParagraphProperties(
                     new ParagraphStyleId() { Val = minimal ? "MinimalNameStyle" : "NameStyle" },
@@ -313,9 +292,6 @@ public class WordDocumentService : IWordDocumentService
     /// </summary>
     private Individual? GetAncestor(int anenummer, Dictionary<string, Individual> individuals)
     {
-        // Debug check - log or check if any individuals have Anenummer set
-        // Console.WriteLine($"Looking for anenummer {anenummer}, total individuals: {individuals.Count}");
-        
         var ancestor = individuals.Values.FirstOrDefault(i => i.Anenummer == anenummer);
         
         // If not found by Anenummer, try to find by relationships
@@ -347,16 +323,13 @@ public class WordDocumentService : IWordDocumentService
     }
     
     /// <summary>
-    /// Gets the background color for a cell based on the Anenummer
+    /// Gets the background color for a cell based on the Anenummer and dynamic start
     /// </summary>
-    private string GetCellBackgroundColor(int anenummer)
+    private string GetCellBackgroundColor(int anenummer, int start)
     {
-        return anenummer switch
-        {
-            1 => "E6F7FF", // Proband
-            2 or 3 => "F0F5FF", // Parents
-            _ => "FFFFFF"  // Others
-        };
+        if (anenummer == start) return "E6F7FF"; // Proband
+        if (anenummer == (start << 1) || anenummer == ((start << 1) + 1)) return "F0F5FF"; // Parents
+        return "FFFFFF";  // Others
     }
     
     /// <summary>

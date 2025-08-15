@@ -1,12 +1,12 @@
 @using GedBlazor.Models
 
-<div class="anetavle-cell" data-anenummer="@AnenNumber">
+<div class="anetavle-cell @(HighlightRole)" data-anenummer="@Anenummer">
     @if (Individual != null)
     {
         @if (!ShowMinimal)
         {
             <div class="info">
-                <div class="anenummer" aria-label="Anenummer">@AnenNumber</div>
+                <div class="anenummer" aria-label="Anenummer">@Anenummer</div>
                 <div class="name" aria-label="Navn">@Individual.FullName</div>
                 <div class="details">
                     @if (Individual.BirthDate != null)
@@ -31,8 +31,8 @@
         else
         {
             <div class="info minimal">
-                <div class="content" aria-label="Ane @AnenNumber">
-                    @AnenNumber @Individual.FullName
+                <div class="content" aria-label="Ane @Anenummer">
+                    @Anenummer @Individual.FullName
                     @if (Individual.BirthDate != null)
                     {
                         <text> * @Individual.BirthDate.ToString()</text>
@@ -49,11 +49,11 @@
     {
         @if (ShowMinimal)
         {
-            <div class="empty minimal">Ingen ane (@AnenNumber)</div>
+            <div class="empty minimal">Ingen ane (@Anenummer)</div>
         }
         else
         {
-            <div class="empty">Ingen ane (@AnenNumber)</div>
+            <div class="empty">Ingen ane (@Anenummer)</div>
         }
     }
 </div>
@@ -70,7 +70,7 @@
     /// The numbering starts with 1 for the proband, 2 for the father, 3 for the mother, etc.
     /// </summary>
     [Parameter]
-    public int AnenNumber { get; set; }
+    public int Anenummer { get; set; }
 
     /// <summary>
     /// When true, displays a minimal vertical view for grandparents and great-grandparents.
@@ -78,6 +78,12 @@
     /// </summary>
     [Parameter]
     public bool ShowMinimal { get; set; }
+
+    /// <summary>
+    /// Optional highlight role for styling. Expected values: "proband", "parent" or null.
+    /// </summary>
+    [Parameter]
+    public string? HighlightRole { get; set; }
 }
 
 <style>
@@ -88,6 +94,10 @@
     min-height: 100px;
     background: white;
 }
+
+/* Dynamic highlight roles */
+.anetavle-cell.proband { background-color: #e6f7ff; }
+.anetavle-cell.parent { background-color: #f0f5ff; }
 
 .info {
     display: flex;
@@ -169,15 +179,5 @@
     border-color: #0078d4;
     box-shadow: 0 0 5px rgba(0, 120, 212, 0.5);
     transition: all 0.2s ease;
-}
-
-/* Custom styling for different generations */
-.anetavle-cell[data-anenummer="1"] {
-    background-color: #e6f7ff;
-}
-
-.anetavle-cell[data-anenummer="2"], 
-.anetavle-cell[data-anenummer="3"] {
-    background-color: #f0f5ff;
 }
 </style>

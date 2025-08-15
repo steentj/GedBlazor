@@ -232,14 +232,16 @@ public partial class GedcomParser : IGedcomParser
         }
     }
 
-    public void AssignAnenummer(Dictionary<string, Individual> individuals, string? probandId)
+    public void AssignAnenummer(Dictionary<string, Individual> individuals, string? probandId, int startAnenummer = 1)
     {
         // Reset all anenummer values
         foreach (var ind in individuals.Values)
             ind.Anenummer = -1;
         if (string.IsNullOrEmpty(probandId) || !individuals.ContainsKey(probandId))
             return;
-        AssignAnenummerRecursive(individuals, probandId, 1);
+        if (startAnenummer <= 0)
+            startAnenummer = 1;
+        AssignAnenummerRecursive(individuals, probandId, startAnenummer);
     }
 
     private void AssignAnenummerRecursive(Dictionary<string, Individual> individuals, string? id, int anenummer)

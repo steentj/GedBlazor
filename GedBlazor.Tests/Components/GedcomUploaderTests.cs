@@ -99,6 +99,40 @@ public class GedcomUploaderTests
         Assert.That(error.TextContent, Does.Contain("Ugyldigt GEDCOM-filformat"));
     }
 
+    [Test]
+    public async Task StartAnenummerInput_ReassignsWithCustomStart()
+    {
+        // Arrange
+        var individuals = new Dictionary<string, Individual>
+        {
+            ["@I1@"] = new Individual("@I1@")
+        };
+        individuals["@I1@"].SetName("John", "Smith");
+        var families = new Dictionary<string, Family>();
+        mockParser.Setup(p => p.Parse(It.IsAny<string>()))
+                  .Returns((individuals, families));
+
+        var cut = ctx.RenderComponent<GedcomUploader>();
+
+        // Upload a file to populate individuals
+        var content = "0 HEAD\n1 CHAR UTF-8\n0 TRLR";
+        var file = new MockBrowserFile("test.ged", content);
+        var inputFile = cut.FindComponent<InputFile>();
+        await inputFile.InvokeAsync(() => inputFile.Instance.OnChange.InvokeAsync(
+            new InputFileChangeEventArgs(new[] { file })));
+
+        // Select proband
+        var select = cut.Find("#probandSelect");
+        select.Change("@I1@");
+
+        // Enter custom start anenummer
+        var input = cut.Find("#startAnenummer");
+        input.Input("7");
+
+        // Verify AssignAnenummer called with custom start
+        mockParser.Verify(p => p.AssignAnenummer(It.IsAny<Dictionary<string, Individual>>(), "@I1@", 7), Times.AtLeastOnce());
+    }
+
     private class MockBrowserFile : IBrowserFile
     {
         private readonly string content;

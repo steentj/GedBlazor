@@ -100,11 +100,46 @@ public class AnetavleTableTests
 
         // Act
         var cut = ctx.RenderComponent<AnetavleTable>(parameters => parameters
-            .Add(p => p.Proband, individuals["@I1@"])
+            .Add(p => p.Proband, individuals["@I1@"]) 
             .Add(p => p.Individuals, individuals));
 
         // Assert - Check that empty placeholders are shown
         Assert.That(cut.FindAll(".empty").Count, Is.GreaterThan(0));
+    }
+
+    [Test]
+    public void AnetavleTable_UsesNonOneStartNumber()
+    {
+        // Arrange
+        var proband = new Individual("@I1@");
+        proband.SetName("John", "Doe");
+        proband.Anenummer = 5; // non-1 start
+        var father = new Individual("@I2@");
+        father.SetName("Father", "Doe");
+        father.Anenummer = 10; // 2*5
+        var mother = new Individual("@I3@");
+        mother.SetName("Mother", "Doe");
+        mother.Anenummer = 11; // 2*5+1
+        var individuals = new Dictionary<string, Individual>
+        {
+            [proband.Id] = proband,
+            [father.Id] = father,
+            [mother.Id] = mother
+        };
+
+        // Act
+        var cut = ctx.RenderComponent<AnetavleTable>(parameters => parameters
+            .Add(p => p.Proband, proband)
+            .Add(p => p.Individuals, individuals));
+
+        // Assert - Proband cell and parent cells reflect start=5
+        var html = cut.Markup;
+        Assert.Multiple(() =>
+        {
+            Assert.That(html, Does.Contain("data-anenummer=\"5\""));
+            Assert.That(html, Does.Contain("data-anenummer=\"10\""));
+            Assert.That(html, Does.Contain("data-anenummer=\"11\""));
+        });
     }
 
     // Helper method to create test data

@@ -48,6 +48,12 @@
                         }
                     </select>
                 </div>
+                <div class="col-md-3">
+                    <label for="startAnenummer" class="form-label">Start anenummer</label>
+                    <input id="startAnenummer" class="form-control" type="number" min="1" max="5999" step="1"
+                           placeholder="1" value="@startAnenummerText" @oninput="OnStartAnenummerInput" />
+                    <div class="form-text">1-5999</div>
+                </div>
             </div>
             <div class="table-responsive" style="margin-left:0.5rem;margin-right:0.5rem;">
                 <table class="table table-striped custom-zebra-table w-100 mt-4">
@@ -119,6 +125,7 @@
     private string sortColumn = "GivenName";
     private bool sortAscending = true;
     private string activeTab = "table";
+    private string startAnenummerText = "1";
 
     private void SetTab(string tab) => activeTab = tab;
 
@@ -192,11 +199,33 @@
         }
     }
 
+    private int GetStartAnenummer()
+    {
+        if (string.IsNullOrWhiteSpace(startAnenummerText))
+            return 1;
+        if (int.TryParse(startAnenummerText, out var n) && n > 0 && n < 6000)
+            return n;
+        return 1;
+    }
+
+    private void OnStartAnenummerInput(Microsoft.AspNetCore.Components.ChangeEventArgs e)
+    {
+        startAnenummerText = e.Value?.ToString() ?? string.Empty;
+        if (individuals != null && !string.IsNullOrEmpty(probandId))
+        {
+            var start = GetStartAnenummer();
+            Parser.AssignAnenummer(individuals, probandId, start);
+        }
+    }
+
     private void OnProbandChanged(Microsoft.AspNetCore.Components.ChangeEventArgs e)
     {
         probandId = e.Value?.ToString();
         if (individuals != null && !string.IsNullOrEmpty(probandId))
-            Parser.AssignAnenummer(individuals, probandId);
+        {
+            var start = GetStartAnenummer();
+            Parser.AssignAnenummer(individuals, probandId, start);
+        }
         else if (individuals != null)
             Parser.AssignAnenummer(individuals, null);
     }

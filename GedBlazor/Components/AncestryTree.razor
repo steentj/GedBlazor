@@ -24,20 +24,19 @@ else
 
     IEnumerable<Individual> individuals = [];
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
-        await base.OnInitializedAsync();
-        individuals = Individuals != null 
-            ? Individuals.Values.Where(i => i.Anenummer == 1) 
-            : new List<Individual>();
+        await base.OnParametersSetAsync();
+        // Root the tree at the selected proband instead of filtering by a fixed Anenummer
+        individuals = Proband != null ? new[] { Proband } : Array.Empty<Individual>();
     }
     
     bool ShouldExpand(object data)
     {
         var ind = data as Individual;
-
-        return ind is not null && ind.Anenummer <= 3;
+        if (ind is null || Proband is null) return false;
+        var start = Proband.Anenummer > 0 ? Proband.Anenummer : 1;
+        // Expand proband and immediate parents only
+        return ind.Anenummer == start || ind.Anenummer == 2 * start || ind.Anenummer == 2 * start + 1;
     }
 }
-
-

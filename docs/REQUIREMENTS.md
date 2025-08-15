@@ -33,10 +33,12 @@ This is a client-side Blazor WebAssembly application for parsing and displaying 
   - `MotherId`: reference to the mother's GEDCOM ID.
 
 ### 2.3 Define the family tree
-- One individual is selected as root person ("Proband") and given "Anenummer" = 1
-- The individual is selected by the user after the parsing of the GEDCOM file.
-- The rest of the persons are, where possible, given Anenummer according to the Kekule von Stadonitz system (see addendum). Cousins, siblings etc which cannot be numbered get a -1 as number.
-
+- One individual is selected as root person ("Proband").
+- The proband is assigned an initial "Anenummer" chosen by the user via a numeric input:
+  - Must be an integer > 0 and < 6000.
+  - Default value is 1 if nothing valid is entered.
+- The rest of the persons are, where possible, given Anenummer according to the Kekule von Stadonitz system (see addendum), computed relative to the proband’s chosen starting value. Cousins, siblings etc which cannot be numbered get a -1 as number.
+- It is safe to assume that the individual with the lowest positive Anenummer is the proband/root.
 
 ### 2.4 User Interface
 
@@ -56,36 +58,34 @@ This is a client-side Blazor WebAssembly application for parsing and displaying 
 - The table is sorted on the first name of the individuals initially.
 - The user may sort the table on any column by clicking on the column header. Clickin sorts alternately ascending and descending.
 
-### 2.4.2 Proband
+#### 2.4.2 Proband
 - The root person (proband) is selected in a drop down populated with the individuals names. 
+- Next to the dropdown is an input field for the starting Anenummer (integer, default 1, valid range 1–5999). Changing the value reassigns Anenummer for all ancestors relative to the proband.
 - After selection the "anenummer" is displayed as the first column in the individuals table. 
 
-### 2.4.3 The Ancestry tree
+#### 2.4.3 The Ancestry tree
 - Is available when the proband has been chosen
 - Shows the ancestry tree from the proband in a collapsible tree view where each node is the anenummer and the ancestor name
 - The nodes are ordered by anenummer
+- The tree is rooted at the currently selected proband and uses the proband’s current Anenummer as the start value.
 - Individuals without an anenummer are not displayed
 
-### 2.4.4 The Anetavle (Ancestor Table)
+#### 2.4.4 The Anetavle (Ancestor Table)
 - Is available when the proband has been chosen
 - Shows direct ancestors up to 4 generations in a traditional table format:
-  - Bottom row: Proband
-  - Second row: Parents (Far/Mor)
-  - Third row: Grandparents (Farfar/Farmor/Morfar/Mormor)
-  - Top row: Great-grandparents (8 ancestors)
+  - Bottom row: Proband (at the proband’s current Anenummer)
+  - Second row: Parents (2×start / 2×start+1)
+  - Third row: Grandparents (4×start … 4×start+3)
+  - Top row: Great-grandparents (8×start … 8×start+7) and Great-great-grandparents (16×start … 16×start+15)
 - Each cell displays:
   - Detailed view (parents and proband): Anenummer, name, birth/death dates and places
   - Compact view (grandparents and great-grandparents): Anenummer, name, birth/death dates only, displayed vertically
 - The layout resembles a traditional printed Anetavle with ancestors organized by generation
-- Uses the Kekulé von Stradonitz System for numbering:
-  - Proband: 1
-  - Father: 2 (2n for any individual's father)
-  - Mother: 3 (2n+1 for any individual's mother)
-  - Paternal Grandfather: 4
-  - Paternal Grandmother: 5
-  - Maternal Grandfather: 6
-  - Maternal Grandmother: 7
-  - And so on for great-grandparents (8-15)
+- Uses the Kekulé von Stradonitz System for numbering relative to the chosen start:
+  - Proband: start
+  - Father: 2×start (2n for any individual's father)
+  - Mother: 2×start+1 (2n+1 for any individual's mother)
+  - And so on for higher generations
 - Cells are visually distinct by generation:
   - Proband's cell has a highlight color
   - Parents cells have a subtler highlight
@@ -143,12 +143,12 @@ This is a client-side Blazor WebAssembly application for parsing and displaying 
 The **Kekulé von Stradonitz system** is a genealogical numbering method used to identify individuals in a **direct ancestral line** of a person (the "proband" or starting person). It does **not** include siblings, cousins, or other collateral relatives.
 
 #### Basic Rules:
-- The **proband** (starting person) is assigned **number 1**.
+- The **proband** (starting person) is assigned the user-selected **start number** (default 1).
 - The **father** of any person `n` is assigned **2 × n**.
 - The **mother** of any person `n` is assigned **2 × n + 1**.
 - This continues recursively for each generation.
 
-### Example:
+### Example (start = 1):
 | Person             | Number |
 |--------------------|--------|
 | Proband            | 1      |
@@ -166,7 +166,7 @@ The **Kekulé von Stradonitz system** is a genealogical numbering method used to
 #### Notes:
 - The system forms a **binary tree**, where:
   - Even numbers are **fathers**.
-  - Odd numbers (except 1) are **mothers**.
+  - Odd numbers (except the start value) are **mothers**.
 - **Siblings**, **cousins**, **aunts/uncles**, and **descendants** are **not numbered** in this system.
 - It is ideal for compact and systematic representation of **ancestral lines** only.
 

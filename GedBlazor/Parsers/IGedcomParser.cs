@@ -15,5 +15,5 @@ public interface IGedcomParser
     /// <exception cref="FormatException">Thrown when content is not valid GEDCOM format</exception>
     (Dictionary<string, Individual> individuals, Dictionary<string, Family> families) Parse(string content);
 
-    void AssignAnenummer(Dictionary<string, GedBlazor.Models.Individual> individuals, string? probandId);
+    void AssignAnenummer(Dictionary<string, GedBlazor.Models.Individual> individuals, string? probandId, int startAnenummer = 1);
 }

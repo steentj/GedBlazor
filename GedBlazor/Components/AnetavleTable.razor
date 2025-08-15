@@ -25,45 +25,45 @@ else
 
     <div class="anetavle" aria-label="Anetavle">
         <div class="generation proband" aria-label="Proband">
-            <AnetavleCell Individual="@Proband" AnenNumber="1" />
+            <AnetavleCell Individual="@Proband" Anenummer="@Start" HighlightRole="proband" />
         </div>
         <div class="generation parents" aria-label="Forældre-generation">
-            <AnetavleCell Individual="@GetAncestor(2)" AnenNumber="2" />
-            <AnetavleCell Individual="@GetAncestor(3)" AnenNumber="3" />
+            <AnetavleCell Individual="@GetAncestor(2 * Start)" Anenummer="@(2 * Start)" HighlightRole="parent" />
+            <AnetavleCell Individual="@GetAncestor(2 * Start + 1)" Anenummer="@(2 * Start + 1)" HighlightRole="parent" />
         </div>
         <div class="generation grandparents" aria-label="Bedsteforældre-generation">
-            <AnetavleCell Individual="@GetAncestor(4)" AnenNumber="4" />
-            <AnetavleCell Individual="@GetAncestor(5)" AnenNumber="5" />
-            <AnetavleCell Individual="@GetAncestor(6)" AnenNumber="6" />
-            <AnetavleCell Individual="@GetAncestor(7)" AnenNumber="7" />
+            <AnetavleCell Individual="@GetAncestor(4 * Start)" Anenummer="@(4 * Start)" />
+            <AnetavleCell Individual="@GetAncestor(4 * Start + 1)" Anenummer="@(4 * Start + 1)" />
+            <AnetavleCell Individual="@GetAncestor(4 * Start + 2)" Anenummer="@(4 * Start + 2)" />
+            <AnetavleCell Individual="@GetAncestor(4 * Start + 3)" Anenummer="@(4 * Start + 3)" />
         </div>
         <div class="generation great-grandparents" aria-label="Oldeforældre-generation">
-            <AnetavleCell Individual="@GetAncestor(8)" AnenNumber="8" ShowMinimal="true" />
-            <AnetavleCell Individual="@GetAncestor(9)" AnenNumber="9" ShowMinimal="true" />
-            <AnetavleCell Individual="@GetAncestor(10)" AnenNumber="10" ShowMinimal="true" />
-            <AnetavleCell Individual="@GetAncestor(11)" AnenNumber="11" ShowMinimal="true" />
-            <AnetavleCell Individual="@GetAncestor(12)" AnenNumber="12" ShowMinimal="true" />
-            <AnetavleCell Individual="@GetAncestor(13)" AnenNumber="13" ShowMinimal="true" />
-            <AnetavleCell Individual="@GetAncestor(14)" AnenNumber="14" ShowMinimal="true" />
-            <AnetavleCell Individual="@GetAncestor(15)" AnenNumber="15" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(8 * Start)" Anenummer="@(8 * Start)" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(8 * Start + 1)" Anenummer="@(8 * Start + 1)" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(8 * Start + 2)" Anenummer="@(8 * Start + 2)" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(8 * Start + 3)" Anenummer="@(8 * Start + 3)" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(8 * Start + 4)" Anenummer="@(8 * Start + 4)" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(8 * Start + 5)" Anenummer="@(8 * Start + 5)" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(8 * Start + 6)" Anenummer="@(8 * Start + 6)" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(8 * Start + 7)" Anenummer="@(8 * Start + 7)" ShowMinimal="true" />
         </div>
         <div class="generation great-great-grandparents" aria-label="Tipoldeforældre-generation">
-            <AnetavleCell Individual="@GetAncestor(16)" AnenNumber="16" ShowMinimal="true" />
-            <AnetavleCell Individual="@GetAncestor(17)" AnenNumber="17" ShowMinimal="true" />
-            <AnetavleCell Individual="@GetAncestor(18)" AnenNumber="18" ShowMinimal="true" />
-            <AnetavleCell Individual="@GetAncestor(19)" AnenNumber="19" ShowMinimal="true" />
-            <AnetavleCell Individual="@GetAncestor(20)" AnenNumber="20" ShowMinimal="true" />
-            <AnetavleCell Individual="@GetAncestor(21)" AnenNumber="21" ShowMinimal="true" />
-            <AnetavleCell Individual="@GetAncestor(22)" AnenNumber="22" ShowMinimal="true" />
-            <AnetavleCell Individual="@GetAncestor(23)" AnenNumber="23" ShowMinimal="true" />
-            <AnetavleCell Individual="@GetAncestor(24)" AnenNumber="24" ShowMinimal="true" />
-            <AnetavleCell Individual="@GetAncestor(25)" AnenNumber="25" ShowMinimal="true" />
-            <AnetavleCell Individual="@GetAncestor(26)" AnenNumber="26" ShowMinimal="true" />
-            <AnetavleCell Individual="@GetAncestor(27)" AnenNumber="27" ShowMinimal="true" />
-            <AnetavleCell Individual="@GetAncestor(28)" AnenNumber="28" ShowMinimal="true" />
-            <AnetavleCell Individual="@GetAncestor(29)" AnenNumber="29" ShowMinimal="true" />
-            <AnetavleCell Individual="@GetAncestor(30)" AnenNumber="30" ShowMinimal="true" />
-            <AnetavleCell Individual="@GetAncestor(31)" AnenNumber="31" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(16 * Start)" Anenummer="@(16 * Start)" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(16 * Start + 1)" Anenummer="@(16 * Start + 1)" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(16 * Start + 2)" Anenummer="@(16 * Start + 2)" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(16 * Start + 3)" Anenummer="@(16 * Start + 3)" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(16 * Start + 4)" Anenummer="@(16 * Start + 4)" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(16 * Start + 5)" Anenummer="@(16 * Start + 5)" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(16 * Start + 6)" Anenummer="@(16 * Start + 6)" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(16 * Start + 7)" Anenummer="@(16 * Start + 7)" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(16 * Start + 8)" Anenummer="@(16 * Start + 8)" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(16 * Start + 9)" Anenummer="@(16 * Start + 9)" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(16 * Start + 10)" Anenummer="@(16 * Start + 10)" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(16 * Start + 11)" Anenummer="@(16 * Start + 11)" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(16 * Start + 12)" Anenummer="@(16 * Start + 12)" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(16 * Start + 13)" Anenummer="@(16 * Start + 13)" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(16 * Start + 14)" Anenummer="@(16 * Start + 14)" ShowMinimal="true" />
+            <AnetavleCell Individual="@GetAncestor(16 * Start + 15)" Anenummer="@(16 * Start + 15)" ShowMinimal="true" />
         </div>
     </div>
 }
@@ -85,6 +85,8 @@ else
     /// Flag to indicate if document download is in progress
     /// </summary>
     private bool isDownloading = false;
+
+    private int Start => Proband != null && Proband.Anenummer > 0 ? Proband.Anenummer : 1;
 
     /// <summary>
     /// Finds an individual with the specified Anenummer.

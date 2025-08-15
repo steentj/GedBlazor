@@ -26,7 +26,7 @@ public class AnetavleCellTests
     {
         // Act
         var cut = ctx.RenderComponent<AnetavleCell>(parameters => parameters
-            .Add(p => p.AnenNumber, 1));
+            .Add(p => p.Anenummer, 1));
 
         // Assert
         Assert.That(cut.Find(".empty").TextContent, Does.Contain("Ingen ane (1)"));
@@ -48,7 +48,7 @@ public class AnetavleCellTests
         // Act
         var cut = ctx.RenderComponent<AnetavleCell>(parameters => parameters
             .Add(p => p.Individual, individual)
-            .Add(p => p.AnenNumber, 1)
+            .Add(p => p.Anenummer, 1)
             .Add(p => p.ShowMinimal, false));
 
         Assert.Multiple(() =>
@@ -78,7 +78,7 @@ public class AnetavleCellTests
         // Act
         var cut = ctx.RenderComponent<AnetavleCell>(parameters => parameters
             .Add(p => p.Individual, individual)
-            .Add(p => p.AnenNumber, 4)
+            .Add(p => p.Anenummer, 4)
             .Add(p => p.ShowMinimal, true));
 
         // Assert
@@ -99,7 +99,7 @@ public class AnetavleCellTests
         // Act
         var cut = ctx.RenderComponent<AnetavleCell>(parameters => parameters
             .Add(p => p.Individual, individual)
-            .Add(p => p.AnenNumber, 1)
+            .Add(p => p.Anenummer, 1)
             .Add(p => p.ShowMinimal, false));
 
         // Assert
