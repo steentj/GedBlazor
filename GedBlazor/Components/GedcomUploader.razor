@@ -2,6 +2,7 @@
 @using GedBlazor.Models
 @using GedBlazor.Parsers
 @inject IGedcomParser Parser
+@inject DialogService DialogService
 
 <div class="gedcom-uploader container-fluid px-1">
     <h2>GEDCOM Viser</h2>
@@ -72,7 +73,11 @@
                             var rowClass = (individual.idx % 2 == 1) ? "even-row" : string.Empty;
                             <tr class="@rowClass">
                                 <td class="align-top">@(individual.ind.Anenummer > 0 ? individual.ind.Anenummer.ToString() : "")</td>
-                                <td class="align-top">@individual.ind.FullName</td>
+                                <td class="align-top">
+                                    <a class="no-underline" href="#" @onclick:preventDefault @onclick="(e) => ShowRaw(individual.ind)" title="Vis rå GED">
+                                        @individual.ind.FullName
+                                    </a>
+                                </td>
                                 <td>
                                     @if (individual.ind.BirthDate != null || !string.IsNullOrEmpty(individual.ind.BirthPlace))
                                     {
@@ -128,6 +133,21 @@
     private string startAnenummerText = "1";
 
     private void SetTab(string tab) => activeTab = tab;
+
+    private async Task ShowRaw(Individual ind)
+    {
+        await DialogService.OpenAsync<RawGedPopup>($"RAW GED – {ind.FullName}", new Dictionary<string, object>
+        {
+            ["Individual"] = ind
+        }, new DialogOptions
+        {
+            ShowClose = true,
+            CloseDialogOnOverlayClick = true,
+            Width = "700px",
+            Resizable = true,
+            Draggable = true
+        });
+    }
 
     private IEnumerable<Individual> GetSortedIndividuals()
     {

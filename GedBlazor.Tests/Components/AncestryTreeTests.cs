@@ -4,6 +4,7 @@ using GedBlazor.Models;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 using System.Collections.Generic;
+using Radzen;
 
 namespace GedBlazor.Tests.Components;
 
@@ -16,6 +17,7 @@ public class AncestryTreeTests
     public void Setup()
     {
         ctx = new Bunit.TestContext();
+        ctx.Services.AddRadzenComponents();
     }
 
     [TearDown]

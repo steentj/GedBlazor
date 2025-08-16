@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using System.Collections.Generic;
 
 namespace GedBlazor.Models;
 
@@ -21,6 +22,21 @@ public class Individual
     public List<Individual> Ancestors { get; set; } = new();
     
     public bool HasAncestors => FatherId != null || MotherId != null;
+
+    // Raw GEDCOM personal data (excluding family link records),
+    // e.g. NAME, SEX, BIRT.DATE, BIRT.PLAC, DEAT.DATE, etc.
+    public Dictionary<string, List<string>> RawPersonalData { get; } = new(StringComparer.OrdinalIgnoreCase);
+    
+    public void AddRaw(string tag, string value)
+    {
+        if (string.IsNullOrWhiteSpace(tag) || string.IsNullOrWhiteSpace(value)) return;
+        if (!RawPersonalData.TryGetValue(tag, out var list))
+        {
+            list = new List<string>();
+            RawPersonalData[tag] = list;
+        }
+        list.Add(value);
+    }
     
     
 

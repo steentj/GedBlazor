@@ -109,3 +109,13 @@ h1:focus {
         right: 0.75rem;
         top: 0.5rem;
     }
+
+/* No-underline utility for clickable names */
+a.no-underline {
+    text-decoration: none !important;
+}
+a.no-underline:hover,
+a.no-underline:focus,
+a.no-underline:active {
+    text-decoration: none !important;
+}

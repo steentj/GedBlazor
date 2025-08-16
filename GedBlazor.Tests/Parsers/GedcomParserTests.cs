@@ -482,4 +482,42 @@ public class GedcomParserTests
         parser.AssignAnenummer(individuals, "@NONEXISTENT@");
         Assert.That(individuals["@I1@"].Anenummer, Is.EqualTo(-1));
     }
+
+    [Test]
+    public void Parse_StoresRawPersonalData_ForIndividual()
+    {
+        const string gedcom = @"0 HEAD
+1 GEDC
+2 VERS 5.5.5
+1 CHAR UTF-8
+0 @I1@ INDI
+1 NAME John /Smith/
+1 SEX M
+1 BIRT
+2 DATE 1 JAN 1950
+2 PLAC Copenhagen, Denmark
+1 DEAT
+2 DATE 2 FEB 2000
+0 TRLR";
+
+        var parser = new GedcomParser();
+        var (individuals, _) = parser.Parse(gedcom);
+        var ind = individuals["@I1@"];
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(ind.RawPersonalData.ContainsKey("NAME"), Is.True);
+            Assert.That(ind.RawPersonalData["NAME"], Does.Contain("John /Smith/"));
+            Assert.That(ind.RawPersonalData.ContainsKey("SEX"), Is.True);
+            Assert.That(ind.RawPersonalData["SEX"], Does.Contain("M"));
+            Assert.That(ind.RawPersonalData.ContainsKey("BIRT.DATE"), Is.True);
+            Assert.That(ind.RawPersonalData["BIRT.DATE"], Does.Contain("1 JAN 1950"));
+            Assert.That(ind.RawPersonalData.ContainsKey("BIRT.PLAC"), Is.True);
+            Assert.That(ind.RawPersonalData["BIRT.PLAC"], Does.Contain("Copenhagen, Denmark"));
+            Assert.That(ind.RawPersonalData.ContainsKey("DEAT.DATE"), Is.True);
+            // Family link tags should not appear
+            Assert.That(ind.RawPersonalData.ContainsKey("FAMC"), Is.False);
+            Assert.That(ind.RawPersonalData.ContainsKey("FAMS"), Is.False);
+        });
+    }
 }

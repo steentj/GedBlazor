@@ -136,6 +136,18 @@ public partial class GedcomParser : IGedcomParser
                         match.Groups["given"].Value.Trim(),
                         match.Groups["surname"].Value.Trim());
                 }
+                // Also record raw NAME line
+                currentIndividual.AddRaw("NAME", parts[2]);
+            }
+            else if (parts.Length > 2)
+            {
+                // Record other level-1 personal tags that have values
+                // Exclude family references (FAMC/FAMS) which are not personal data to show here
+                if (!string.Equals(tag, "FAMC", StringComparison.OrdinalIgnoreCase) &&
+                    !string.Equals(tag, "FAMS", StringComparison.OrdinalIgnoreCase))
+                {
+                    currentIndividual.AddRaw(tag, parts[2]);
+                }
             }
             return tag;
         }
@@ -170,6 +182,9 @@ public partial class GedcomParser : IGedcomParser
     {
         if (parts.Length < 3 || currentIndividual == null || currentTag == null)
             return;
+
+        // Record raw sub-tag for current personal tag, e.g., BIRT.DATE, DEAT.PLAC, NAME.GIVN, etc.
+        currentIndividual.AddRaw($"{currentTag}.{parts[1]}", parts[2]);
 
         if (currentTag == "BIRT" || currentTag == "DEAT")
         {

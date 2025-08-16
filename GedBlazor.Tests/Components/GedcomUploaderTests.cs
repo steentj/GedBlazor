@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using NUnit.Framework;
 using System.Text;
+using Radzen;
 
 namespace GedBlazor.Tests.Components;
 
@@ -14,14 +15,15 @@ namespace GedBlazor.Tests.Components;
 public class GedcomUploaderTests
 {
     private Bunit.TestContext ctx;
-    private Mock<IGedcomParser> mockParser;
+    private Moq.Mock<IGedcomParser> mockParser;
 
     [SetUp]
     public void Setup()
     {
         ctx = new Bunit.TestContext();
-        mockParser = new Mock<IGedcomParser>();
+        mockParser = new Moq.Mock<IGedcomParser>();
         ctx.Services.AddSingleton<IGedcomParser>(mockParser.Object);
+        ctx.Services.AddRadzenComponents();
     }
 
     [TearDown]
