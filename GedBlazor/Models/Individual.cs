@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace GedBlazor.Models;
 
@@ -62,6 +63,28 @@ public class Individual
     public void SetDeath(GedcomDate date)
     {
         DeathDate = date;
+    }
+
+    // Completeness evaluation helpers
+    private bool HasName => !string.IsNullOrWhiteSpace(GivenName) || !string.IsNullOrWhiteSpace(Surname);
+    private bool HasBirthOrDeathDate => BirthDate.HasValue || DeathDate.HasValue;
+    private bool HasBirthAndDeathPlaces => !string.IsNullOrWhiteSpace(BirthPlace) && !string.IsNullOrWhiteSpace(DeathPlace);
+    private bool HasBirthOrDeathSource =>
+        (RawPersonalData.TryGetValue("BIRT.SOUR", out var bSour) && bSour.Count > 0) ||
+        (RawPersonalData.TryGetValue("DEAT.SOUR", out var dSour) && dSour.Count > 0);
+    private bool HasResidency => RawPersonalData.ContainsKey("RESI") || RawPersonalData.Keys.Any(k => k.StartsWith("RESI.", StringComparison.OrdinalIgnoreCase));
+
+    // Status: 0 = no name; 1 = name; 2 = name + date; 3 = status 2 + source for birth/death + both birth/death places; 4 = status 3 + one or more residencies
+    public int CompletionStatus
+    {
+        get
+        {
+            if (!HasName) return 0;
+            if (!HasBirthOrDeathDate) return 1;
+            var hasBase3 = HasBirthOrDeathSource && HasBirthAndDeathPlaces;
+            if (!hasBase3) return 2;
+            return HasResidency ? 4 : 3;
+        }
     }
 
     public override string ToString()

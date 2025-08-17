@@ -17,7 +17,10 @@ else
                 @{var ind = data.Value as Individual; }
                 @if (ind != null)
                 {
-                    <a class="no-underline" href="#" @onclick:preventDefault @onclick="() => ShowRaw(ind)" title="Vis rå GED">@ind.FullName</a>
+                    <a class="no-underline" href="#" @onclick:preventDefault @onclick="() => ShowRaw(ind)" title="Vis rå GED">
+                        <span style="display:inline-block;width:0.6rem;height:0.6rem;border-radius:50%;background-color:@GetStatusColor(ind);margin-right:0.35rem;"></span>
+                        @ind.FullName
+                    </a>
                 }
             </Template>
         </RadzenTreeLevel>
@@ -59,5 +62,10 @@ else
             Resizable = true,
             Draggable = true
         });
+    }
+
+    private string GetStatusColor(Individual ind)
+    {
+        return ind.CompletionStatus < 2 ? "#dc3545" : (ind.CompletionStatus == 2 ? "#ffc107" : "#28a745");
     }
 }

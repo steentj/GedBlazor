@@ -77,4 +77,56 @@ public class IndividualTests
         // Assert
         Assert.That(result, Is.EqualTo("John Smith (01-01-1980 - 31-12-2020)"));
     }
+
+    [Test]
+    public void CompletionStatus_NoName_Returns0()
+    {
+        var ind = new Individual("@I1@");
+        ind.SetBirth(new GedcomDate(null, null, 1900));
+        Assert.That(ind.CompletionStatus, Is.EqualTo(0));
+    }
+
+    [Test]
+    public void CompletionStatus_NameOnly_Returns1()
+    {
+        var ind = new Individual("@I1@");
+        ind.SetName("John", "");
+        Assert.That(ind.CompletionStatus, Is.EqualTo(1));
+    }
+
+    [Test]
+    public void CompletionStatus_NameAndDate_Returns2()
+    {
+        var ind = new Individual("@I1@");
+        ind.SetName("John", "Doe");
+        ind.SetDeath(new GedcomDate(null, null, 1990));
+        Assert.That(ind.CompletionStatus, Is.EqualTo(2));
+    }
+
+    [Test]
+    public void CompletionStatus_Status3_RequiresNameDatePlacesAndSource()
+    {
+        var ind = new Individual("@I1@");
+        ind.SetName("Jane", "Doe");
+        ind.SetBirth(new GedcomDate(null, null, 1950));
+        ind.BirthPlace = "Copenhagen";
+        ind.DeathPlace = "Aarhus";
+        // Any source for birth or death qualifies
+        ind.AddRaw("BIRT.SOUR", "@S1@");
+        Assert.That(ind.CompletionStatus, Is.EqualTo(3));
+    }
+
+    [Test]
+    public void CompletionStatus_Status4_WhenResidencyPresent()
+    {
+        var ind = new Individual("@I1@");
+        ind.SetName("Jane", "Doe");
+        ind.SetBirth(new GedcomDate(null, null, 1950));
+        ind.BirthPlace = "Copenhagen";
+        ind.DeathPlace = "Aarhus";
+        ind.AddRaw("DEAT.SOUR", "@S2@");
+        // Residency can be on a subtag only
+        ind.AddRaw("RESI.PLAC", "Odense");
+        Assert.That(ind.CompletionStatus, Is.EqualTo(4));
+    }
 }

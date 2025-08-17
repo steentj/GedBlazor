@@ -11,6 +11,7 @@ A client-side Blazor WebAssembly application for parsing and displaying genealog
   - Death date and place
   - Family relationships (parents)
 - Interactive table view with all individuals
+- Completion Status per individual (colored dot next to names: red <2, yellow =2, green >2)
 - Select a proband (root person) to visualize ancestry:
   - View ancestral tree with collapsible nodes
   - Display traditional Anetavle (ancestor table) up to 4 generations
@@ -56,6 +57,24 @@ A client-side Blazor WebAssembly application for parsing and displaying genealog
 dotnet test
 ```
 
+## Completion Status
+
+Each individual has a computed completeness status (0–4) indicated by a colored dot before the name in the Personer tab and Ancestry Tree, and available programmatically via `Individual.CompletionStatus`:
+
+- 0: No name present
+- 1: Name present (either given name or surname or both)
+- 2: Status 1 plus a birth or death date (full date or year)
+- 3: Status 2 plus: at least one source for birth or death, and both birth place and death place are present
+- 4: Status 3 plus: one or more residencies
+
+Dot colors:
+- Red for status < 2, Yellow for status = 2, Green for status > 2
+
+Notes:
+- Sources are detected from GEDCOM tags `BIRT.SOUR` or `DEAT.SOUR` captured in `Individual.RawPersonalData`.
+- Residency is detected when any `RESI` or `RESI.*` personal tag exists in `Individual.RawPersonalData`.
+- Birth/death dates accept a full date or just a year; approximate dates (e.g., `ABT 1900`) are supported by `GedcomDate`.
+
 ## Technical Details
 
 - Built with .NET 9.0 and Blazor WebAssembly
@@ -69,10 +88,9 @@ dotnet test
 
 - Handles one GEDCOM file per session
 - Supports GEDCOM versions 5.5 and 5.5.1
-- Does not currently support multimedia, notes, or sources
+- Sources are captured for status computation but not yet displayed in the UI
 - Names are parsed according to standard GEDCOM conventions
 
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
-

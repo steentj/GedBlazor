@@ -60,11 +60,11 @@
                 <table class="table table-striped custom-zebra-table w-100 mt-4">
                     <thead>
                         <tr>
-                            <th style="width: 7%;" @onclick='() => SortBy("Anenummer")'>Anenummer</th>
-                            <th style="width: 23%;" @onclick='() => SortBy("FullName")'>Navn</th>
-                            <th style="width: 23%;" @onclick='() => SortBy("BirthDate")'>Fødsel</th>
-                            <th style="width: 23%;" @onclick='() => SortBy("DeathDate")'>Død</th>
-                            <th style="width: 24%;" @onclick='() => SortBy("Father")'>Far / mor</th>
+                            <th style="width: 8%;" @onclick='() => SortBy("Anenummer")'>Anenummer</th>
+                            <th style="width: 26%;" @onclick='() => SortBy("FullName")'>Navn</th>
+                            <th style="width: 22%;" @onclick='() => SortBy("BirthDate")'>Fødsel</th>
+                            <th style="width: 22%;" @onclick='() => SortBy("DeathDate")'>Død</th>
+                            <th style="width: 22%;" @onclick='() => SortBy("Father")'>Far / mor</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -75,6 +75,7 @@
                                 <td class="align-top">@(individual.ind.Anenummer > 0 ? individual.ind.Anenummer.ToString() : "")</td>
                                 <td class="align-top">
                                     <a class="no-underline" href="#" @onclick:preventDefault @onclick="(e) => ShowRaw(individual.ind)" title="Vis rå GED">
+                                        <span style="display:inline-block;width:0.6rem;height:0.6rem;border-radius:50%;background-color:@GetStatusColor(individual.ind);margin-right:0.35rem;"></span>
                                         @individual.ind.FullName
                                     </a>
                                 </td>
@@ -166,8 +167,6 @@
             ("DeathDate", false) => list.OrderByDescending(i => i.DeathDate),
             ("Father", true) => list.OrderBy(i => i.FatherId != null && individuals.TryGetValue(i.FatherId, out var f) ? f.FullName : ""),
             ("Father", false) => list.OrderByDescending(i => i.FatherId != null && individuals.TryGetValue(i.FatherId, out var f) ? f.FullName : ""),
-            ("Mother", true) => list.OrderBy(i => i.MotherId != null && individuals.TryGetValue(i.MotherId, out var m) ? m.FullName : ""),
-            ("Mother", false) => list.OrderByDescending(i => i.MotherId != null && individuals.TryGetValue(i.MotherId, out var m) ? m.FullName : ""),
             _ => list.OrderBy(i => i.FullName),
         };
     }
@@ -248,5 +247,10 @@
         }
         else if (individuals != null)
             Parser.AssignAnenummer(individuals, null);
+    }
+
+    private string GetStatusColor(Individual ind)
+    {
+        return ind.CompletionStatus < 2 ? "#dc3545" : (ind.CompletionStatus == 2 ? "#ffc107" : "#28a745");
     }
 }

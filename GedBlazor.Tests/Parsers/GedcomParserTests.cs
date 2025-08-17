@@ -520,4 +520,35 @@ public class GedcomParserTests
             Assert.That(ind.RawPersonalData.ContainsKey("FAMS"), Is.False);
         });
     }
+
+    [Test]
+    public void Parse_CapturesBirthDeathSourcesAndResidencyPlace_InRawData()
+    {
+        const string gedcom = @"0 HEAD
+1 GEDC
+2 VERS 5.5.5
+1 CHAR UTF-8
+0 @I1@ INDI
+1 NAME Source /Test/
+1 BIRT
+2 DATE 1 JAN 1900
+2 SOUR @S1@
+1 DEAT
+2 DATE 2 FEB 1950
+2 SOUR @S2@
+1 RESI
+2 PLAC Odense, Denmark
+0 TRLR";
+        var (individuals, _) = parser.Parse(gedcom);
+        var ind = individuals["@I1@"];
+        Assert.Multiple(() =>
+        {
+            Assert.That(ind.RawPersonalData.ContainsKey("BIRT.SOUR"), Is.True);
+            Assert.That(ind.RawPersonalData["BIRT.SOUR"], Does.Contain("@S1@"));
+            Assert.That(ind.RawPersonalData.ContainsKey("DEAT.SOUR"), Is.True);
+            Assert.That(ind.RawPersonalData["DEAT.SOUR"], Does.Contain("@S2@"));
+            Assert.That(ind.RawPersonalData.ContainsKey("RESI.PLAC"), Is.True);
+            Assert.That(ind.RawPersonalData["RESI.PLAC"], Does.Contain("Odense, Denmark"));
+        });
+    }
 }
