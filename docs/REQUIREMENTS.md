@@ -76,10 +76,11 @@ This is a client-side Blazor WebAssembly application for parsing and displaying 
   - Bottom row: Proband (at the proband’s current Anenummer)
   - Second row: Parents (2×start / 2×start+1)
   - Third row: Grandparents (4×start … 4×start+3)
-  - Top row: Great-grandparents (8×start … 8×start+7) and Great-great-grandparents (16×start … 16×start+15)
+  - Fourth row: Great-grandparents (8×start … 8×start+7)
+  - Fitht row: Great-great-grandparents (16×start … 16×start+15)
 - Each cell displays:
-  - Detailed view (parents and proband): Anenummer, name, birth/death dates and places
-  - Compact view (grandparents and great-grandparents): Anenummer, name, birth/death dates only, displayed vertically
+  - Detailed view (grandparents, parents and proband): Anenummer, name, birth/death dates and places
+  - Compact view (great-great grandparents and great-grandparents): Anenummer, name, birth/death dates onlon one line, displayed vertically
 - The layout resembles a traditional printed Anetavle with ancestors organized by generation
 - Uses the Kekulé von Stradonitz System for numbering relative to the chosen start:
   - Proband: start

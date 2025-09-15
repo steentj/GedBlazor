@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
@@ -105,7 +102,7 @@ public class WordDocumentService : IWordDocumentService
         var gggRow = new TableRow
         {
             TableRowProperties = new TableRowProperties(
-                new TableRowHeight() { Val = 3500, HeightType = HeightRuleValues.AtLeast }
+                new TableRowHeight() { Val = 4000, HeightType = HeightRuleValues.AtLeast }
             )
         };
         int gen4Start = start << 4; // start * 16
@@ -121,7 +118,7 @@ public class WordDocumentService : IWordDocumentService
         var ggRow = new TableRow
         {
             TableRowProperties = new TableRowProperties(
-                new TableRowHeight() { Val = 3500, HeightType = HeightRuleValues.AtLeast }
+                new TableRowHeight() { Val = 4000, HeightType = HeightRuleValues.AtLeast }
             )
         };
         int gen3Start = start << 3; // start * 8
@@ -219,55 +216,86 @@ public class WordDocumentService : IWordDocumentService
             );
             cell.AppendChild(namePara);
             
-            // Add birth info
-            if (individual.BirthDate != null)
+            // Add date info
+            if (minimal)
             {
-                var birthDatePara = new Paragraph(
-                    new ParagraphProperties(
-                        new ParagraphStyleId() { Val = "DateStyle" },
-                        new Justification() { Val = JustificationValues.Center }
-                    ),
-                    new Run(new Text($"*{individual.BirthDate}"))
-                );
-                cell.AppendChild(birthDatePara);
-                
-                // Add birthplace if not minimal and place exist
-                if (!minimal && !string.IsNullOrEmpty(individual.BirthPlace))
+                // For minimal cells (vertical), combine birth and death dates on one line
+                if (individual.BirthDate != null || individual.DeathDate != null)
                 {
-                    var birthPlacePara = new Paragraph(
+                    var dateText = "";
+                    if (individual.BirthDate != null)
+                    {
+                        dateText += $"*{individual.BirthDate}";
+                    }
+                    if (individual.DeathDate != null)
+                    {
+                        if (!string.IsNullOrEmpty(dateText)) dateText += " ";
+                        dateText += $"†{individual.DeathDate}";
+                    }
+                    
+                    var datesPara = new Paragraph(
                         new ParagraphProperties(
-                            new ParagraphStyleId() { Val = "PlaceStyle" },
+                            new ParagraphStyleId() { Val = "MinimalDateStyle" },
                             new Justification() { Val = JustificationValues.Center }
                         ),
-                        new Run(new Text(individual.BirthPlace))
+                        new Run(new Text(dateText))
                     );
-                    cell.AppendChild(birthPlacePara);
+                    cell.AppendChild(datesPara);
                 }
             }
-            
-            // Add death info
-            if (individual.DeathDate != null)
+            else
             {
-                var deathDatePara = new Paragraph(
-                    new ParagraphProperties(
-                        new ParagraphStyleId() { Val = "DateStyle" },
-                        new Justification() { Val = JustificationValues.Center }
-                    ),
-                    new Run(new Text($"†{individual.DeathDate}"))
-                );
-                cell.AppendChild(deathDatePara);
-                
-                // Add death place if not minimal and place exist
-                if (!minimal && !string.IsNullOrEmpty(individual.DeathPlace))
+                // For regular cells, keep birth and death dates on separate lines
+                // Add birth info
+                if (individual.BirthDate != null)
                 {
-                    var deathPlacePara = new Paragraph(
+                    var birthDatePara = new Paragraph(
                         new ParagraphProperties(
-                            new ParagraphStyleId() { Val = "PlaceStyle" },
+                            new ParagraphStyleId() { Val = "DateStyle" },
                             new Justification() { Val = JustificationValues.Center }
                         ),
-                        new Run(new Text(individual.DeathPlace))
+                        new Run(new Text($"*{individual.BirthDate}"))
                     );
-                    cell.AppendChild(deathPlacePara);
+                    cell.AppendChild(birthDatePara);
+                    
+                    // Add birthplace if place exists
+                    if (!string.IsNullOrEmpty(individual.BirthPlace))
+                    {
+                        var birthPlacePara = new Paragraph(
+                            new ParagraphProperties(
+                                new ParagraphStyleId() { Val = "PlaceStyle" },
+                                new Justification() { Val = JustificationValues.Center }
+                            ),
+                            new Run(new Text(individual.BirthPlace))
+                        );
+                        cell.AppendChild(birthPlacePara);
+                    }
+                }
+                
+                // Add death info
+                if (individual.DeathDate != null)
+                {
+                    var deathDatePara = new Paragraph(
+                        new ParagraphProperties(
+                            new ParagraphStyleId() { Val = "DateStyle" },
+                            new Justification() { Val = JustificationValues.Center }
+                        ),
+                        new Run(new Text($"†{individual.DeathDate}"))
+                    );
+                    cell.AppendChild(deathDatePara);
+                    
+                    // Add death place if place exists
+                    if (!string.IsNullOrEmpty(individual.DeathPlace))
+                    {
+                        var deathPlacePara = new Paragraph(
+                            new ParagraphProperties(
+                                new ParagraphStyleId() { Val = "PlaceStyle" },
+                                new Justification() { Val = JustificationValues.Center }
+                            ),
+                            new Run(new Text(individual.DeathPlace))
+                        );
+                        cell.AppendChild(deathPlacePara);
+                    }
                 }
             }
         }
@@ -419,7 +447,7 @@ public class WordDocumentService : IWordDocumentService
         minimalNameStyle.AppendChild(new StyleName { Val = "MinimalNameStyle" });
         minimalNameStyle.AppendChild(new BasedOn { Val = "Normal" });
         minimalNameStyle.AppendChild(new ParagraphProperties(
-            new SpacingBetweenLines { After = "60", Before = "60", Line = "240", LineRule = LineSpacingRuleValues.Auto }
+            new SpacingBetweenLines { After = "20", Before = "20", Line = "180", LineRule = LineSpacingRuleValues.Auto }
         ));
         minimalNameStyle.AppendChild(new RunProperties(
             new FontSize { Val = "18" },
@@ -427,7 +455,7 @@ public class WordDocumentService : IWordDocumentService
         ));
         stylesPart.Styles.AppendChild(minimalNameStyle);    
         
-        // Create Date style
+        // Create Date style for regular cells
         var dateStyle = new Style
         {
             Type = StyleValues.Paragraph,
@@ -443,6 +471,23 @@ public class WordDocumentService : IWordDocumentService
             new FontSize { Val = "20" }
         ));
         stylesPart.Styles.AppendChild(dateStyle);
+        
+        // Create Date style for minimal cells
+        var minimalDateStyle = new Style
+        {
+            Type = StyleValues.Paragraph,
+            StyleId = "MinimalDateStyle",
+            CustomStyle = true
+        };
+        minimalDateStyle.AppendChild(new StyleName { Val = "MinimalDateStyle" });
+        minimalDateStyle.AppendChild(new BasedOn { Val = "Normal" });
+        minimalDateStyle.AppendChild(new ParagraphProperties(
+            new SpacingBetweenLines { After = "20", Before = "20", Line = "180", LineRule = LineSpacingRuleValues.Auto }
+        ));
+        minimalDateStyle.AppendChild(new RunProperties(
+            new FontSize { Val = "18" }
+        ));
+        stylesPart.Styles.AppendChild(minimalDateStyle);
         
         // Create Place style
         var placeStyle = new Style
